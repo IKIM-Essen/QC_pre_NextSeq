@@ -1,0 +1,4 @@
+sample_name,fq1,fq2
+115_L001,/groups/ds/resistance_cefiderocol/data/illumina/115_L001_R1.fastq.gz,/groups/ds/resistance_cefiderocol/data/illumina/115_L001_R2.fastq.gz
+139_L001,/groups/ds/resistance_cefiderocol/data/illumina/139_L001_R1.fastq.gz,/groups/ds/resistance_cefiderocol/data/illumina/139_L001_R2.fastq.gz
+I15566-L1,/projects/pig-muenster/Metagenome_Kiel/fastq/I15566-L1_R1.fastq.gz,/projects/pig-muenster/Metagenome_Kiel/fastq/I15566-L1_R2.fastq.gz

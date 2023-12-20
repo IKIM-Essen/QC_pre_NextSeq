@@ -1,4 +1,28 @@
-# Main entrypoint of the workflow. 
-# Please follow the best practices: 
+# Main entrypoint of the workflow.
+# Please follow the best practices:
 # https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
-# in particular regarding the standardized folder structure mentioned there. 
+# in particular regarding the standardized folder structure mentioned there.
+
+
+configfile: "config/config.yaml"
+
+
+pepfile: config["pepfile"]
+
+
+include: "rules/common.smk"
+include: "rules/contamination.smk"
+include: "rules/qc.smk"
+
+
+rule all:
+    input:
+        expand(
+            "results/{date}/qc/multiqc.html",
+            date=get_run_date(),
+        ),
+        expand(
+            "results/{date}/contamination/stats_{sample}.txt",
+            date=get_run_date(),
+            sample=get_samples(),
+        ),

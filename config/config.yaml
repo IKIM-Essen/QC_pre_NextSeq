@@ -1,0 +1,17 @@
+pepfile: config/pep/config.yaml
+
+run-date: "23_12_18"
+
+adapter-seqs: "-a CTGTCTCTTATACACATCT -g CTGTCTCTTATACACATCT"
+data-handling:
+  # path to store data within the workflow
+  data: "data/"
+  resources: "resources/"
+
+quality-criteria:
+  # minimal length of acceptable reads
+  min-length-reads: 15
+  # average quality of acceptable reads (PHRED)
+  min-PHRED: 20
+
+human-ref: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.29_GRCh38.p14/GCA_000001405.29_GRCh38.p14_genomic.fna.gz"
