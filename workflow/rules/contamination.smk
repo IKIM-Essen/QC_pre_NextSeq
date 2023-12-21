@@ -1,9 +1,9 @@
 rule download_human_ref:
     output:
-        get_human_ref(),
+        hfile=get_human_ref(),
     params:
         download=config["human-ref"],
-        folder=get_resource_path(),
+        folder=lambda wildcards, output: Path(output.hfile).parent, #get_resource_path(),
     log:
         "logs/human_ref_download.log",
     conda:
