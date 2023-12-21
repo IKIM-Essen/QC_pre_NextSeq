@@ -2,7 +2,8 @@ pepfile: config/pep/config.yaml
 
 run-date: "23_12_18"
 
-adapter-seqs: "-a CTGTCTCTTATACACATCT -g CTGTCTCTTATACACATCT"
+adapter-seqs: "-a GCGAATTTCGACGATCGTTGCATTAACTCGCGAA -g AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
+
 data-handling:
   # path to store data within the workflow
   data: "data/"

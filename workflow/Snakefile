@@ -13,16 +13,13 @@ pepfile: config["pepfile"]
 include: "rules/common.smk"
 include: "rules/contamination.smk"
 include: "rules/qc.smk"
+include: "rules/report.smk"
 
 
 rule all:
     input:
         expand(
-            "results/{date}/qc/multiqc.html",
+            "results/{date}/output/report.zip",
             date=get_run_date(),
         ),
-        expand(
-            "results/{date}/contamination/stats_{sample}.txt",
-            date=get_run_date(),
-            sample=get_samples(),
-        ),
+        

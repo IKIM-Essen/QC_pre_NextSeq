@@ -1,14 +1,18 @@
-#import matplotlib.pyplot as plt
 import pandas as pd
 import altair as alt
+import re
+import sys
 
-samples=["I15566-L1","115_L001","139_L001"]
-cont_warning= 50
+sys.stderr = open(snakemake.log[0], "w")
+
+stat_files=snakemake.input.stats
+outfile=snakemake.output[0]
 
 sum_dict={}
-for sample in samples:
+for stats_path in stat_files:
+    file=stats_path.split("/")[-1]
+    sample=(re.search('stats_(.*).txt', file)).group(1)
     sample_sum_dict = {}
-    stats_path=f"results/23_12_18/contamination/stats_{sample}.txt"
     with open(stats_path, "r") as stats:
         for line in stats:
             if line.startswith("SN	sequences"):
@@ -27,7 +31,6 @@ for sample in samples:
 sum_df = pd.DataFrame.from_dict(sum_dict, orient="index")
 sum_df = sum_df.reset_index()
 sum_df.rename(columns={"index":"sample"}, inplace=True)
-print(sum_df)
 
 
 slider = alt.binding_range(min=0, max=100, step=0.5, name='max human contamination:')
@@ -44,7 +47,7 @@ base_chart=alt.Chart(sum_df,title="% human contamination").encode(
 ).properties(width="container").interactive()
 
 bars=base_chart.mark_bar().encode(color=alt.condition(
-       (alt.datum.contamination*100) >= selector.contamination,
+       (alt.datum.contamination*100) >= selector.max_contamination,
        alt.value('#9A0430'),
        alt.value('#6ea165')
    ))
@@ -60,4 +63,4 @@ chart_text = base_chart.mark_text(
 
 
 full_chart = bars + chart_text
-full_chart.save('chart.html')
+full_chart.save(outfile)

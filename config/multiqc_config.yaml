@@ -32,6 +32,7 @@ fn_clean_exts:
   - "_R1"
   - "_S"
   - ".1"
+  - ".2"
   
 # customising general Statistics
 table_columns_visible:
@@ -39,11 +40,12 @@ table_columns_visible:
     percent_duplicates: False
     percent_gc: False
     avg_sequence_length: False
+    median_sequence_length: False
     percent_fails: False
-    total_sequences: True
+    total_sequences: False
   Reads Preprocessing:
     pct_duplication: False
-    after_filtering_q30_rate: False
+    after_filtering_q30_rate: True
     after_filtering_q30_bases: False
     after_filtering_gc_content: False
     pct_surviving: True

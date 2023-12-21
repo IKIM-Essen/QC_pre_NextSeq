@@ -32,13 +32,6 @@ def get_local_fastqs(wildcards):
     return (
         "{data}{{date}}/{{sample}}_R1.fastq.gz".format(data=path),
         "{data}{{date}}/{{sample}}_R2.fastq.gz".format(data=path),
-        )
-
-
-def get_trimmed_fastq(wildcards):
-    path = get_data_path()
-    return (
-        "{data}{{date}}/{{sample}}_R1.fastq.gz".format(data=path),
     )
 
 
@@ -53,8 +46,13 @@ def get_trimmed_fastqs(wildcards):
     ]
 
 
+def get_trimmed_fastq(wildcards):
+    fastqs = get_trimmed_fastqs(wildcards)
+    return fastqs[0]
+
+
 def get_human_ref():
     link = config["human-ref"]
     path = get_resource_path()
     file = link.split("/")[-1]
-    return f"{path}{file}"
+    return (f"{path}{file}")

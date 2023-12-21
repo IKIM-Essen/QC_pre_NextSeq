@@ -28,7 +28,7 @@ rule fastp:
                 "results/{date}/qc/fastp/{sample}.2.fastq.gz",
             ]
         ),
-        html="results/{date}/qc/fastp/{sample}.html",
+        html=temp("results/{date}/qc/fastp/{sample}.html"),
         json="results/{date}/qc/fastp/{sample}.fastp.json",
     params:
         adapters=get_adapters,
@@ -47,7 +47,7 @@ rule fastqc:
     input:
         get_trimmed_fastq,
     output:
-        html="results/{date}/qc/fastqc/{sample}.html",
+        html=temp("results/{date}/qc/fastqc/{sample}.html"),
         zip="results/{date}/qc/fastqc/{sample}_fastqc.zip",
     log:
         "logs/{date}/fastqc/{sample}.log",
@@ -69,12 +69,10 @@ rule multiqc:
         ),
     output:
         report(
-            "results/{date}/qc/multiqc.html",
-            htmlindex="multiqc.html",
-            category="1. Quality control",
-            labels={"sample": "all samples", "type": "view"},
+            "results/{date}/output/multiqc.html",
+            category="Quality control",
         ),
-        "results/{date}/qc/multiqc_data.zip",
+        "results/{date}/output/multiqc_data.zip",
     params:
         extra=(
             "--zip-data-dir "
