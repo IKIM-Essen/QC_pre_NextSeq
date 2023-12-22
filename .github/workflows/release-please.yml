@@ -14,4 +14,3 @@ jobs:
         id: release
         with:
           release-type: simple
-          package-name: release-please-action
