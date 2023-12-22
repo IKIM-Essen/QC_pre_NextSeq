@@ -1,6 +1,8 @@
 *
 !.github
 !.github/**
+!.tests
+!.tests/**
 !config
 !config/REAMDE.md
 !config/config.yaml

@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - uses: GoogleCloudPlatform/release-please-action@v2
+      - uses: google-github-actions/release-please-action@v3
         id: release
         with:
-          release-type: go # just keep a changelog, no version anywhere outside of git tags
-          package-name: <repo>
+          release-type: simple
+          package-name: release-please-action
