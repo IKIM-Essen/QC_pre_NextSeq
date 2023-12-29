@@ -13,13 +13,18 @@ pepfile: config["pepfile"]
 include: "rules/common.smk"
 include: "rules/contamination.smk"
 include: "rules/qc.smk"
+include: "rules/species_diversity.smk"
 include: "rules/report.smk"
 
 
 rule all:
     input:
         expand(
-            "results/{date}/output/report.zip",
+            "results/{date}/report/report.zip",
             date=get_run_date(),
         ),
-        
+        expand(
+            "results/{date}/report/bracken/merged.bracken_{level}.txt",
+            date=get_run_date(),
+            level=["genus", "family", "class", "phylum"],
+        ),

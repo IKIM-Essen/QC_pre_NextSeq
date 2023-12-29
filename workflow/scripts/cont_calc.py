@@ -11,7 +11,7 @@ outfile=snakemake.output[0]
 sum_dict={}
 for stats_path in stat_files:
     file=stats_path.split("/")[-1]
-    sample=(re.search('stats_(.*).txt', file)).group(1)
+    sample=(re.search('(.*)_stats.txt', file)).group(1)
     sample_sum_dict = {}
     with open(stats_path, "r") as stats:
         for line in stats:

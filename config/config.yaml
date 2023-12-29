@@ -16,3 +16,7 @@ quality-criteria:
   min-PHRED: 20
 
 human-ref: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.29_GRCh38.p14/GCA_000001405.29_GRCh38.p14_genomic.fna.gz"
+
+kraken:
+  download-path: "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20231009.tar.gz"
+  db-name: "k2_standard"

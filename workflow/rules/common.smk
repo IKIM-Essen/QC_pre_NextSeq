@@ -56,3 +56,12 @@ def get_human_ref():
     path = get_resource_path()
     file = link.split("/")[-1]
     return (f"{path}{file}")
+
+
+def get_kraken_db_file():
+    file = "{}{}/hash.k2d".format(get_resource_path(), config["kraken"]["db-name"])
+    return file
+
+
+def get_kraken_report(wildcards):
+    return "results/{date}/diversity/kraken_reports/{sample}_report.tsv"

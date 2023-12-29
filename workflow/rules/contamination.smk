@@ -21,7 +21,7 @@ rule minimap2_bam_sorted:
     output:
         temp("results/{date}/contamination/{sample}.sorted.bam"),
     log:
-        "logs/{date}/contamination/mapping_{sample}.log",
+        "logs/{date}/contamination/mapping/{sample}.log",
     params:
         extra="-x map-pb",  
         sorting="coordinate",
@@ -31,29 +31,15 @@ rule minimap2_bam_sorted:
         "v3.3.1/bio/minimap2/aligner"
 
 
-rule samtools_index:
-    input:
-        "results/{date}/contamination/{sample}.sorted.bam",
-    output:
-        temp("results/{date}/contamination/{sample}.sorted.bam.bai"),
-    log:
-        "logs/{date}/contamination/indexing_{sample}.log",
-    params:
-        extra="",
-    threads: 4
-    wrapper:
-        "v3.3.1/bio/samtools/index"
-
-
 rule host_stats:
     input:
         bam="results/{date}/contamination/{sample}.sorted.bam",
     output:
-        "results/{date}/contamination/stats_{sample}.txt",
+        "results/{date}/contamination/{sample}_stats.txt",
     params:
         extra="",
     log:
-        "logs/{date}/contamination/stats_{sample}.log",
+        "logs/{date}/contamination/stats/{sample}.log",
     wrapper:
         "v3.3.1/bio/samtools/stats"
 
@@ -61,12 +47,12 @@ rule host_stats:
 rule plot_contamination:
     input:
         stats=expand(
-            "results/{{date}}/contamination/stats_{sample}.txt", sample=get_samples()
+            "results/{{date}}/contamination/{sample}_stats.txt", sample=get_samples()
         ),
     output:
         report(
-            "results/{date}/output/plot_contamination.html",
-            category="Quality control",
+            "results/{date}/report/contamination.html",
+            category="1. Quality control",
         ),
     log:
         "logs/{date}/contamination/plot.log",
