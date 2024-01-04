@@ -55,7 +55,7 @@ def get_human_ref():
     link = config["human-ref"]
     path = get_resource_path()
     file = link.split("/")[-1]
-    return (f"{path}{file}")
+    return f"{path}{file}"
 
 
 def get_kraken_db_file():
@@ -65,3 +65,7 @@ def get_kraken_db_file():
 
 def get_kraken_report(wildcards):
     return "results/{date}/diversity/kraken_reports/{sample}_report.tsv"
+
+
+def get_bacterial_levels():
+    return ["genus", "family", "class", "phylum"]

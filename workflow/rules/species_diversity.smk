@@ -168,6 +168,25 @@ rule merge_bracken:
         "(python $CONDA_PREFIX/bin/combine_bracken_outputs.py --files {input} --output {output}) > {log} 2>&1"
 
 
+rule create_bracken_plot:
+    input:
+        "results/{date}/report/bracken/merged.bracken_{level}.txt",
+    output:
+        report(
+            "results/{date}/report/{level}_abundance.html",
+            category="2. Species diversity",
+            labels={"level":"{level}"},
+        ),
+    params:
+        # all level values below 1% will be summed up as other
+        threshold=0.01,
+    log:
+        "logs/{date}/diversity/bracken/plot_{level}.log",
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/brackenplot.py"
+
 '''
 rule create_bracken_plot:
     input:

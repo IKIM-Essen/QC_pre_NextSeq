@@ -5,6 +5,7 @@ rule snakemake_report:
         "results/{date}/report/contamination.html",
         # 2. species diversity
         "results/{date}/report/diversity/",
+        expand("results/{{date}}/report/{level}_abundance.html", level=get_bacterial_levels())
     output:
         "results/{date}/report/report.zip",  #html",
     log:

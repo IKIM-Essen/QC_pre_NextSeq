@@ -23,8 +23,4 @@ rule all:
             "results/{date}/report/report.zip",
             date=get_run_date(),
         ),
-        expand(
-            "results/{date}/report/bracken/merged.bracken_{level}.txt",
-            date=get_run_date(),
-            level=["genus", "family", "class", "phylum"],
-        ),
+        

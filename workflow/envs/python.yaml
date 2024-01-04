@@ -3,5 +3,8 @@ channels:
   - bioconda
   - anaconda
 dependencies:
-  - pandas = 2.0.3
+  - pandas = 2.1.4
   - altair = 5.2.0
+  - numpy = 1.26.3
+  - distinctipy = 1.2.3
+  - matplotlib = 3.8.2
