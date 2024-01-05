@@ -5,8 +5,8 @@ rule local_fastqs:
     input:
         get_fastqs,
     output:
-        raw1=(f"{RAW_DATA_PATH}{{date}}/{{sample}}_R1.fastq.gz"),
-        raw2=(f"{RAW_DATA_PATH}{{date}}/{{sample}}_R2.fastq.gz"),
+        raw1=temp(f"{RAW_DATA_PATH}{{date}}/{{sample}}_R1.fastq.gz"),
+        raw2=temp(f"{RAW_DATA_PATH}{{date}}/{{sample}}_R2.fastq.gz"),
     params:
         outdir=lambda wildcards, output: Path(output.raw1).parent,
     log:
@@ -29,7 +29,7 @@ rule fastp:
             ]
         ),
         html=temp("results/{date}/qc/fastp/{sample}.html"),
-        json="results/{date}/qc/fastp/{sample}.fastp.json",
+        json=temp("results/{date}/qc/fastp/{sample}.fastp.json"),
     params:
         adapters=get_adapters,
         extra="--qualified_quality_phred {phred} --length_required {minlen}".format(
@@ -48,7 +48,7 @@ rule fastqc:
         get_trimmed_fastq,
     output:
         html=temp("results/{date}/qc/fastqc/{sample}.html"),
-        zip="results/{date}/qc/fastqc/{sample}_fastqc.zip",
+        zip=temp("results/{date}/qc/fastqc/{sample}_fastqc.zip"),
     log:
         "logs/{date}/qc/fastqc/{sample}.log",
     threads: 4
@@ -69,10 +69,10 @@ rule multiqc:
         ),
     output:
         report(
-            "results/{date}/qc/multiqc.html",
+            "results/{date}/report/qc/multiqc.html",
             category="1. Quality control",
         ),
-        "results/{date}/qc/multiqc_data.zip",
+        "results/{date}/report/qc/multiqc_data.zip", 
     params:
         extra=(
             "--zip-data-dir "

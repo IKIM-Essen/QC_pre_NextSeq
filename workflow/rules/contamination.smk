@@ -3,7 +3,7 @@ rule download_human_ref:
         hfile=get_human_ref(),
     params:
         download=config["human-ref"],
-        folder=lambda wildcards, output: Path(output.hfile).parent, #get_resource_path(),
+        folder=lambda wildcards, output: Path(output.hfile).parent,  #get_resource_path(),
     log:
         "logs/human_ref_download.log",
     conda:
@@ -23,7 +23,7 @@ rule minimap2_bam_sorted:
     log:
         "logs/{date}/contamination/mapping/{sample}.log",
     params:
-        extra="-x map-pb",  
+        extra="-x map-pb",
         sorting="coordinate",
         sort_extra="",
     threads: 4
@@ -35,7 +35,7 @@ rule host_stats:
     input:
         bam="results/{date}/contamination/{sample}.sorted.bam",
     output:
-        "results/{date}/contamination/{sample}_stats.txt",
+        temp("results/{date}/contamination/{sample}_stats.txt"),
     params:
         extra="",
     log:
@@ -50,10 +50,11 @@ rule plot_contamination:
             "results/{{date}}/contamination/{sample}_stats.txt", sample=get_samples()
         ),
     output:
-        report(
-            "results/{date}/report/contamination.html",
+        html=report(
+            "results/{date}/report/plots/human_contamination.html",
             category="1. Quality control",
         ),
+        csv="results/{date}/report/contamination/human_contamination.csv",
     log:
         "logs/{date}/contamination/plot.log",
     conda:

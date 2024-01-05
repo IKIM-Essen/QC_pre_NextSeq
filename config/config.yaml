@@ -20,3 +20,5 @@ human-ref: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_0000014
 kraken:
   download-path: "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20231009.tar.gz"
   db-name: "k2_standard"
+
+table-config: '/>github<\/a>/a \\t\t\t</li>\n\t\t\t<li class="nav-item"> \n\t\t\t\t<a class="nav-link" href="#">'

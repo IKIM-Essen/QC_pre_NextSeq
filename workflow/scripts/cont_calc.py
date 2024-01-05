@@ -6,7 +6,8 @@ import sys
 sys.stderr = open(snakemake.log[0], "w")
 
 stat_files=snakemake.input.stats
-outfile=snakemake.output[0]
+out_html=snakemake.output.html
+out_csv=snakemake.output.csv
 
 sum_dict={}
 for stats_path in stat_files:
@@ -31,7 +32,9 @@ for stats_path in stat_files:
 sum_df = pd.DataFrame.from_dict(sum_dict, orient="index")
 sum_df = sum_df.reset_index()
 sum_df.rename(columns={"index":"sample"}, inplace=True)
+sum_df.sort_index(inplace=True)
 
+sum_df.to_csv(out_csv)
 
 slider = alt.binding_range(min=0, max=100, step=0.5, name='max human contamination:')
 #selector = alt.param(name='SelectorName', value=50, bind=slider)
@@ -63,4 +66,4 @@ chart_text = base_chart.mark_text(
 
 
 full_chart = bars + chart_text
-full_chart.save(outfile)
+full_chart.save(out_html)

@@ -52,10 +52,9 @@ def get_trimmed_fastq(wildcards):
 
 
 def get_human_ref():
-    link = config["human-ref"]
-    path = get_resource_path()
-    file = link.split("/")[-1]
-    return f"{path}{file}"
+    file = config["human-ref"].split("/")[-1]
+    local_ref = "{}{}".format(get_resource_path(), file)
+    return local_ref
 
 
 def get_kraken_db_file():
