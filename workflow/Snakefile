@@ -23,4 +23,3 @@ rule all:
             "results/{date}/report/{date}_report.zip",
             date=get_run_date(),
         ),
-        

@@ -5,8 +5,8 @@ rule local_fastqs:
     input:
         get_fastqs,
     output:
-        raw1=temp(f"{RAW_DATA_PATH}{{date}}/{{sample}}_R1.fastq.gz"),
-        raw2=temp(f"{RAW_DATA_PATH}{{date}}/{{sample}}_R2.fastq.gz"),
+        raw1=temp(f"{RAW_DATA_PATH}{date}/{sample}_R1.fastq.gz"),
+        raw2=temp(f"{RAW_DATA_PATH}{date}/{sample}_R2.fastq.gz"),
     params:
         outdir=lambda wildcards, output: Path(output.raw1).parent,
     log:
@@ -72,7 +72,7 @@ rule multiqc:
             "results/{date}/report/qc/multiqc.html",
             category="1. Quality control",
         ),
-        "results/{date}/report/qc/multiqc_data.zip", 
+        "results/{date}/report/qc/multiqc_data.zip",
     params:
         extra=(
             "--zip-data-dir "

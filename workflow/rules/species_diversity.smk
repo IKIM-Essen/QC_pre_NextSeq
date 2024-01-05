@@ -77,7 +77,7 @@ rule kraken2_report:
         "../envs/rbt.yaml"
     shell:
         "rbt csv-report {input} --pin-until {params.pin_until} {output} && "
-        '(sed -i \'{params.pattern} {params.header}</a>\' '
+        "(sed -i '{params.pattern} {params.header}</a>' "
         "{output}/indexes/index1.html && "
         "sed -i 's/report.xlsx/{params.name}_report.xlsx/g' {output}/indexes/index1.html) && "
         "mv {output}/report.xlsx {output}/{params.name}_report.xlsx && "
@@ -89,8 +89,12 @@ rule bracken_genus:
         hfile=get_kraken_db_file(),
         kreport=get_kraken_report,
     output:
-        breport=temp("results/{date}/report/diversity/bracken/reports_genus/{sample}.breport"),
-        bfile=temp("results/{date}/report/diversity/bracken/files_genus/{sample}.bracken"),
+        breport=temp(
+            "results/{date}/report/diversity/bracken/reports_genus/{sample}.breport"
+        ),
+        bfile=temp(
+            "results/{date}/report/diversity/bracken/files_genus/{sample}.bracken"
+        ),
     params:
         db=lambda wildcards, input: Path(input.hfile).parent,
         level="G",
@@ -110,8 +114,12 @@ use rule bracken_genus as bracken_family with:
         hfile=get_kraken_db_file(),
         kreport=get_kraken_report,
     output:
-        breport=temp("results/{date}/report/diversity/bracken/reports_family/{sample}.breport"),
-        bfile=temp("results/{date}/report/diversity/bracken/files_family/{sample}.bracken"),
+        breport=temp(
+            "results/{date}/report/diversity/bracken/reports_family/{sample}.breport"
+        ),
+        bfile=temp(
+            "results/{date}/report/diversity/bracken/files_family/{sample}.bracken"
+        ),
     params:
         db=lambda wildcards, input: Path(input.hfile).parent,
         level="F",
@@ -124,8 +132,12 @@ use rule bracken_genus as bracken_phylum with:
         hfile=get_kraken_db_file(),
         kreport=get_kraken_report,
     output:
-        breport=temp("results/{date}/report/diversity/bracken/reports_phylum/{sample}.breport"),
-        bfile=temp("results/{date}/report/diversity/bracken/files_phylum/{sample}.bracken"),
+        breport=temp(
+            "results/{date}/report/diversity/bracken/reports_phylum/{sample}.breport"
+        ),
+        bfile=temp(
+            "results/{date}/report/diversity/bracken/files_phylum/{sample}.bracken"
+        ),
     params:
         db=lambda wildcards, input: Path(input.hfile).parent,
         level="P",
@@ -138,8 +150,12 @@ use rule bracken_genus as bracken_class with:
         hfile=get_kraken_db_file(),
         kreport=get_kraken_report,
     output:
-        breport=temp("results/{date}/report/diversity/bracken/reports_class/{sample}.breport"),
-        bfile=temp("results/{date}/report/diversity/bracken/files_class/{sample}.bracken"),
+        breport=temp(
+            "results/{date}/report/diversity/bracken/reports_class/{sample}.breport"
+        ),
+        bfile=temp(
+            "results/{date}/report/diversity/bracken/files_class/{sample}.bracken"
+        ),
     params:
         db=lambda wildcards, input: Path(input.hfile).parent,
         level="C",
