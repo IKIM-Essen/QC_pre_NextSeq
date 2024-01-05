@@ -29,7 +29,7 @@ rule fastp:
             ]
         ),
         html=temp("results/{date}/qc/fastp/{sample}.html"),
-        json="results/{date}/qc/fastp/{sample}.fastp.json",
+        json=temp("results/{date}/qc/fastp/{sample}.fastp.json"),
     params:
         adapters=get_adapters,
         extra="--qualified_quality_phred {phred} --length_required {minlen}".format(
@@ -37,7 +37,7 @@ rule fastp:
             minlen=(config["quality-criteria"]["min-length-reads"]),
         ),
     log:
-        "logs/{date}/fastp/{sample}.log",
+        "logs/{date}/qc/fastp/{sample}.log",
     threads: 2
     wrapper:
         "v3.3.1/bio/fastp"
@@ -48,9 +48,9 @@ rule fastqc:
         get_trimmed_fastq,
     output:
         html=temp("results/{date}/qc/fastqc/{sample}.html"),
-        zip="results/{date}/qc/fastqc/{sample}_fastqc.zip",
+        zip=temp("results/{date}/qc/fastqc/{sample}_fastqc.zip"),
     log:
-        "logs/{date}/fastqc/{sample}.log",
+        "logs/{date}/qc/fastqc/{sample}.log",
     threads: 4
     resources:
         mem_mb=1024,
@@ -69,17 +69,18 @@ rule multiqc:
         ),
     output:
         report(
-            "results/{date}/output/multiqc.html",
-            category="Quality control",
+            "results/{date}/report/qc/multiqc.html",
+            category="1. Quality control",
         ),
-        "results/{date}/output/multiqc_data.zip",
+        "results/{date}/report/qc/multiqc_data.zip",
     params:
         extra=(
             "--zip-data-dir "
             "--config config/multiqc_config.yaml "
             "--title 'Quality control for MiSeq run from {date}'"
         ),
+        use_input_files_only=True,
     log:
-        "logs/{date}/multiqc.log",
+        "logs/{date}/qc/multiqc.log",
     wrapper:
         "v3.3.1/bio/multiqc"

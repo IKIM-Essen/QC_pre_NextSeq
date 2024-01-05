@@ -52,7 +52,19 @@ def get_trimmed_fastq(wildcards):
 
 
 def get_human_ref():
-    link = config["human-ref"]
-    path = get_resource_path()
-    file = link.split("/")[-1]
-    return (f"{path}{file}")
+    file = config["human-ref"].split("/")[-1]
+    local_ref = "{}{}".format(get_resource_path(), file)
+    return local_ref
+
+
+def get_kraken_db_file():
+    file = "{}{}/hash.k2d".format(get_resource_path(), config["kraken"]["db-name"])
+    return file
+
+
+def get_kraken_report(wildcards):
+    return "results/{date}/diversity/kraken_reports/{sample}_report.tsv"
+
+
+def get_bacterial_levels():
+    return ["genus", "family", "class", "phylum"]

@@ -3,7 +3,7 @@ rule download_human_ref:
         hfile=get_human_ref(),
     params:
         download=config["human-ref"],
-        folder=lambda wildcards, output: Path(output.hfile).parent, #get_resource_path(),
+        folder=lambda wildcards, output: Path(output.hfile).parent,  #get_resource_path(),
     log:
         "logs/human_ref_download.log",
     conda:
@@ -21,9 +21,9 @@ rule minimap2_bam_sorted:
     output:
         temp("results/{date}/contamination/{sample}.sorted.bam"),
     log:
-        "logs/{date}/contamination/mapping_{sample}.log",
+        "logs/{date}/contamination/mapping/{sample}.log",
     params:
-        extra="-x map-pb",  
+        extra="-x map-pb",
         sorting="coordinate",
         sort_extra="",
     threads: 4
@@ -31,29 +31,15 @@ rule minimap2_bam_sorted:
         "v3.3.1/bio/minimap2/aligner"
 
 
-rule samtools_index:
-    input:
-        "results/{date}/contamination/{sample}.sorted.bam",
-    output:
-        temp("results/{date}/contamination/{sample}.sorted.bam.bai"),
-    log:
-        "logs/{date}/contamination/indexing_{sample}.log",
-    params:
-        extra="",
-    threads: 4
-    wrapper:
-        "v3.3.1/bio/samtools/index"
-
-
 rule host_stats:
     input:
         bam="results/{date}/contamination/{sample}.sorted.bam",
     output:
-        "results/{date}/contamination/stats_{sample}.txt",
+        temp("results/{date}/contamination/{sample}_stats.txt"),
     params:
         extra="",
     log:
-        "logs/{date}/contamination/stats_{sample}.log",
+        "logs/{date}/contamination/stats/{sample}.log",
     wrapper:
         "v3.3.1/bio/samtools/stats"
 
@@ -61,13 +47,14 @@ rule host_stats:
 rule plot_contamination:
     input:
         stats=expand(
-            "results/{{date}}/contamination/stats_{sample}.txt", sample=get_samples()
+            "results/{{date}}/contamination/{sample}_stats.txt", sample=get_samples()
         ),
     output:
-        report(
-            "results/{date}/output/plot_contamination.html",
-            category="Quality control",
+        html=report(
+            "results/{date}/report/plots/human_contamination.html",
+            category="1. Quality control",
         ),
+        csv="results/{date}/report/contamination/human_contamination.csv",
     log:
         "logs/{date}/contamination/plot.log",
     conda:
