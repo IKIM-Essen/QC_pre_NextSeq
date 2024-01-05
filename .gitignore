@@ -20,3 +20,4 @@
 !.snakemake-workflow-catalog.yml
 !LICENSE
 !README.md
+workflow/scripts/test_cont_plot.ipynb
