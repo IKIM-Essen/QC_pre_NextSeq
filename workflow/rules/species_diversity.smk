@@ -2,7 +2,7 @@ rule download_kraken_db:
     output:
         hfile=get_kraken_db_file(),
     params:
-        download=config["kraken"]["download-path"],
+        download=get_kraken_url(),
         db_folder=lambda wildcards, output: Path(output.hfile).parent,
     log:
         "logs/kraken2_DB_download.log",
@@ -163,6 +163,24 @@ use rule bracken_genus as bracken_class with:
         "logs/{date}/diversity/bracken/class/{sample}.log",
 
 
+use rule bracken_genus as bracken_domain with:
+    input:
+        hfile=get_kraken_db_file(),
+        kreport=get_kraken_report,
+    output:
+        breport=temp(
+            "results/{date}/report/diversity/bracken/reports_domain/{sample}.breport"
+        ),
+        bfile=temp(
+            "results/{date}/report/diversity/bracken/files_domain/{sample}.bracken"
+        ),
+    params:
+        db=lambda wildcards, input: Path(input.hfile).parent,
+        level="D",
+    log:
+        "logs/{date}/diversity/bracken/domain/{sample}.log",
+
+
 rule merge_bracken:
     input:
         expand(
@@ -202,3 +220,37 @@ rule create_bracken_plot:
         "../envs/python.yaml"
     script:
         "../scripts/brackenplot.py"
+
+
+rule bracken_summary:
+    input:
+        merged = "results/{date}/report/diversity/bracken/merged.bracken_domain.txt",
+    output:
+        csv="results/{date}/report/diversity/brk_diversity_summary.csv",
+    log:
+        "logs/{date}/diversity/brk_summary.log",
+    threads: 2
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/bracken_summary.py"
+
+
+use rule kraken2_report as bracken2report with:
+    input:
+        "results/{date}/report/diversity/brk_diversity_summary.csv",
+    output:
+        report(
+            directory("results/{date}/report/diversity/brk_diversity_summary/"),
+            htmlindex="index.html",
+            category="2. Species diversity",
+            labels={"level": "all"},
+        ),
+    params:
+        pin_until="sample",
+        styles="resources/report/tables/",
+        name="brk_diversity_summary",
+        header="Bracken diversity summary",
+        pattern=config["table-config"],
+    log:
+        "logs/{date}/diversity/brk_summary_to_html.log",

@@ -5,6 +5,7 @@ rule snakemake_report:
         "results/{date}/report/plots/human_contamination.html",
         # 2. species diversity
         "results/{date}/report/diversity/diversity_summary/",
+        "results/{date}/report/diversity/brk_diversity_summary/",
         expand(
             "results/{{date}}/report/plots/abundance_{level}.html",
             level=get_bacterial_levels(),

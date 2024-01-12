@@ -58,7 +58,7 @@ def get_plot_title(level):
         "phylum": "phyla",
     }
 
-    level_title = "Relative abundance of bacterial {}".format(level_to_title[level])
+    level_title = "Relative abundance of {}".format(level_to_title[level])
     return level_title
 
 
