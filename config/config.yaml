@@ -20,4 +20,4 @@ human-ref: "https://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens/annotation/GRCh38_late
 kraken:
   download-path: "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20231009.tar.gz"
 
-table-config: '/>github<\/a>/a \\t\t\t</li>\n\t\t\t<li class="nav-item"> \n\t\t\t\t<a class="nav-link" href="#">'
+tablular-config: '/>github<\/a>/a \\t\t\t</li>\n\t\t\t<li class="nav-item"> \n\t\t\t\t<a class="nav-link" href="#">'

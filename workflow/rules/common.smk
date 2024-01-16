@@ -63,8 +63,8 @@ def get_kraken_url():
 
 def get_kraken_db_file():
     url = get_kraken_url()
-    db_name = (Path(url).name).rsplit("_",1)[0]
-    file = "{}{}/hash.k2d".format(get_resource_path(),db_name)
+    db_name = (Path(url).name).rsplit("_", 1)[0]
+    file = "{}{}/hash.k2d".format(get_resource_path(), db_name)
     return file
 
 
@@ -72,5 +72,5 @@ def get_kraken_report(wildcards):
     return "results/{date}/diversity/kraken_reports/{sample}_report.tsv"
 
 
-def get_bacterial_levels():
-    return ["genus", "family", "class", "phylum"]
+def get_tax_levels():
+    return ["genus", "domain"]

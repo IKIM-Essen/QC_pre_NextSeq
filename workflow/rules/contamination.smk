@@ -26,14 +26,15 @@ rule minimap2_bam_sorted:
         extra="-x map-pb",
         sorting="coordinate",
         sort_extra="",
-    threads: 4
+    threads: 12
     wrapper:
-        "v3.3.1/bio/minimap2/aligner"
+        "v3.3.3/bio/minimap2/aligner"
 
 
 rule host_stats:
     input:
-        bam="results/{date}/contamination/{sample}.sorted.bam",
+        bam=rules.minimap2_bam_sorted.output,
+        #"results/{date}/contamination/{sample}.sorted.bam",
     output:
         temp("results/{date}/contamination/{sample}_stats.txt"),
     params:
@@ -41,23 +42,4 @@ rule host_stats:
     log:
         "logs/{date}/contamination/stats/{sample}.log",
     wrapper:
-        "v3.3.1/bio/samtools/stats"
-
-
-rule plot_contamination:
-    input:
-        stats=expand(
-            "results/{{date}}/contamination/{sample}_stats.txt", sample=get_samples()
-        ),
-    output:
-        html=report(
-            "results/{date}/report/plots/human_contamination.html",
-            category="1. Quality control",
-        ),
-        csv="results/{date}/report/contamination/human_contamination.csv",
-    log:
-        "logs/{date}/contamination/plot.log",
-    conda:
-        "../envs/python.yaml"
-    script:
-        "../scripts/cont_calc.py"
+        "v3.3.3/bio/samtools/stats"

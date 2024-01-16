@@ -40,7 +40,7 @@ rule fastp:
         "logs/{date}/qc/fastp/{sample}.log",
     threads: 2
     wrapper:
-        "v3.3.1/bio/fastp"
+        "v3.3.3/bio/fastp"
 
 
 rule fastqc:
@@ -55,7 +55,7 @@ rule fastqc:
     resources:
         mem_mb=1024,
     wrapper:
-        "v3.3.1/bio/fastqc"
+        "v3.3.3/bio/fastqc"
 
 
 rule multiqc:
@@ -70,8 +70,9 @@ rule multiqc:
     output:
         report(
             "results/{date}/report/qc/multiqc.html",
-            category="1. Quality control",
+            category="3. MultiQC report",
         ),
+        #labels={"": "3. MultiQC report"}
         "results/{date}/report/qc/multiqc_data.zip",
     params:
         extra=(
@@ -83,4 +84,4 @@ rule multiqc:
     log:
         "logs/{date}/qc/multiqc.log",
     wrapper:
-        "v3.3.1/bio/multiqc"
+        "v3.3.3/bio/multiqc"
