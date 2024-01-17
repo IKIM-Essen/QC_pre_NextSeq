@@ -17,9 +17,30 @@ include: "rules/species_diversity.smk"
 include: "rules/report.smk"
 
 
+DATE = get_run_date()
+
+
 rule all:
     input:
         expand(
             "results/{date}/report/{date}_report.zip",
-            date=get_run_date(),
+            date=DATE,
         ),
+        expand(
+            "results/{date}/report/bracken/merged.bracken_{level}.txt",
+            date=DATE,
+            level=get_tax_levels(),
+        ),
+
+
+onsuccess:
+    shell("tar cpfz results/{DATE}/{DATE}_results.tar.gz results/{DATE}/report/")
+    print(
+        "Workflow finished without an error. You can find the results in {date}_results.tar.gz".format(
+            date=DATE
+        )
+    )
+
+
+onerror:
+    print("An error occurred")

@@ -57,8 +57,14 @@ def get_human_ref():
     return local_ref
 
 
+def get_kraken_url():
+    return config["kraken"]["download-path"]
+
+
 def get_kraken_db_file():
-    file = "{}{}/hash.k2d".format(get_resource_path(), config["kraken"]["db-name"])
+    url = get_kraken_url()
+    db_name = (Path(url).name).rsplit("_", 1)[0]
+    file = "{}{}/hash.k2d".format(get_resource_path(), db_name)
     return file
 
 
@@ -66,5 +72,5 @@ def get_kraken_report(wildcards):
     return "results/{date}/diversity/kraken_reports/{sample}_report.tsv"
 
 
-def get_bacterial_levels():
-    return ["genus", "family", "class", "phylum"]
+def get_tax_levels():
+    return ["genus", "domain"]
