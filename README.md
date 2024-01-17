@@ -7,9 +7,9 @@ A Snakemake workflow for quick quality control of Illumina MiSeq paired end data
 
 ## Usage
 
-### Step 1: Install Snakemake and Snakedeploy
+### Step 1: Install Snakemake
 
-Snakemake and Snakedeploy are best installed via the [Mamba package manager](https://github.com/mamba-org/mamba) (a drop-in replacement for conda). If you have neither Conda nor Mamba, it can be installed via [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge). For other options see [here](https://github.com/mamba-org/mamba).
+Snakemake is best installed via the [Mamba package manager](https://github.com/mamba-org/mamba) (a drop-in replacement for conda). If you have neither Conda nor Mamba, it can be installed via [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge). For other options see [here](https://github.com/mamba-org/mamba).
 
 Given that Mamba is installed, run
 
@@ -43,8 +43,6 @@ Second, to clone the full workflow run:
 
 ### Step 3: Configure workflow
 
-### General settings
-
 #### Config file
 
 To configure this workflow, modify `config/config.yaml` according to your needs, following the explanations provided in the file. It is especially recommended to provide the correct adapter sequences, so they can be trimmed appropriately.
@@ -53,8 +51,7 @@ To configure this workflow, modify `config/config.yaml` according to your needs,
 
 The sample sheet contains all samples to be analyzed.
 Samples to be analyzed must be added manually to the sample sheet.
-For each sample, a new line in `config/pep/samples.csv` with the following
-content has to be defined:
+For each sample, a new line in `config/pep/samples.csv` with the following content has to be defined:
 
 - **sample_name**: name or identifier of sample
 - **fq1**: path to read 1 in FASTQ format
@@ -72,6 +69,8 @@ Fow running the workflow while deploying any necessary software via conda (using
 ```
 
 Snakemake will automatically detect the main Snakefile in the workflow subfolder and execute the workflow.
+
+**Note:** By adding `--dry-run` or (`-n`) to the Snakemake command, you can see which steps shall be executed without actually running them.
 
 The usage of this workflow is described in the [Snakemake Workflow Catalog](https://snakemake.github.io/snakemake-workflow-catalog/?usage=<owner>%2F<repo>).
 
