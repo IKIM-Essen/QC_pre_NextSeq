@@ -1,23 +1,41 @@
 pepfile: config/pep/config.yaml
 
+## this will be used as name for the results folder and can be found in the report
 run-date: "23_12_18"
 
+## adapter sequences used for trimming
 adapter-seqs: "-a GCGAATTTCGACGATCGTTGCATTAACTCGCGAA -g AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
 
+## Option for the auto-creation of the sample sheet
+sample-sheet:
+  # False or True : Should the sample sheet be auto-created?
+  auto-creation: True
+  # False or True : Should the sample fastqs be renamed?
+  # e.g. from sampleID_S40_L001_R1_001.fastq.gz to sampleID_R1.fastq.gz
+  rename-sample-files: False
+  # path to the fastq files of the samples for the sample sheet
+  data-path: "/groups/ds/metagenomes/run_folder/"
+
+
 data-handling:
-  # path to store data within the workflow
+  # path to store input fastq data within the workflow
   data: "data/"
+  # path to store databases and reference genomes used within the workflow
   resources: "resources/"
 
+
+## qualtiy criteria used for filtering
 quality-criteria:
   # minimal length of acceptable reads
   min-length-reads: 15
   # average quality of acceptable reads (PHRED)
   min-PHRED: 20
 
+
 human-ref: "https://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens/annotation/GRCh38_latest/refseq_identifiers/GRCh38_latest_genomic.fna.gz"
 
 kraken:
   download-path: "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20231009.tar.gz"
 
+## string term used for formatting output tables
 tablular-config: '/>github<\/a>/a \\t\t\t</li>\n\t\t\t<li class="nav-item"> \n\t\t\t\t<a class="nav-link" href="#">'

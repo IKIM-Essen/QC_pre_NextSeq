@@ -50,12 +50,24 @@ To configure this workflow, modify `config/config.yaml` according to your needs,
 #### Sample sheet
 
 The sample sheet contains all samples to be analyzed.
-Samples to be analyzed must be added manually to the sample sheet.
+
+#### Auto creation
+
+You can choose to automatically create a sample sheet with all samples in a specified directory (modifications in `config/config.yaml`). Only `fastq.gz` files are taken into account. Additionally there is the option to rename the sequencers output FASTQ files during this step, e.g. from `sampleID_S40_L001_R1_001.fastq.gz` to `sampleID_R1.fastq.gz`.    
+To create the sample sheet and provide it for the workflow, run:
+
+```sh
+    snakemake --cores all --use-conda create_sample_sheet
+```
+
+#### Manual creation or editing
+
+Samples to be analyzed can also be added manually to the sample sheet.
 For each sample, a new line in `config/pep/samples.csv` with the following content has to be defined:
 
 - **sample_name**: name or identifier of sample
-- **fq1**: path to read 1 in FASTQ format
-- **fq2**: path to read 2 in FASTQ format
+- **fq1**: path to read 1 in gzip FASTQ format
+- **fq2**: path to read 2 in gzip FASTQ format
 
 
 ### Step 4: Run workflow
