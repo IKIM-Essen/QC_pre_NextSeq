@@ -16,8 +16,11 @@ include: "rules/qc.smk"
 include: "rules/species_diversity.smk"
 include: "rules/report.smk"
 
+
 if config["sample-sheet"]["auto-creation"]:
+
     include: "rules/preprocessing.smk"
+
 
 DATE = get_run_date()
 
@@ -37,15 +40,10 @@ rule all:
 
 onsuccess:
     print("Workflow finished without an error.")
-    if os.path.exists("results/{date}/report/{date}_report.zip".format(date=DATE)):  
+    if os.path.exists("results/{date}/report/{date}_report.zip".format(date=DATE)):
         shell("tar cpfz results/{DATE}/{DATE}_results.tar.gz results/{DATE}/report/")
-        print(
-            "You can find the results in {date}_results.tar.gz".format(
-                date=DATE
-            )
-        )
+        print("You can find the results in {date}_results.tar.gz".format(date=DATE))
 
 
 onerror:
     print("An error occurred")
-

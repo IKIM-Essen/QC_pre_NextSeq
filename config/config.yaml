@@ -16,13 +16,11 @@ sample-sheet:
   # path to the fastq files of the samples for the sample sheet
   data-path: "/groups/ds/metagenomes/run_folder/"
 
-
 data-handling:
   # path to store input fastq data within the workflow
   data: "data/"
   # path to store databases and reference genomes used within the workflow
   resources: "resources/"
-
 
 ## qualtiy criteria used for filtering
 quality-criteria:
@@ -30,7 +28,6 @@ quality-criteria:
   min-length-reads: 15
   # average quality of acceptable reads (PHRED)
   min-PHRED: 20
-
 
 human-ref: "https://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens/annotation/GRCh38_latest/refseq_identifiers/GRCh38_latest_genomic.fna.gz"
 
