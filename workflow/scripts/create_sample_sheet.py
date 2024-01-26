@@ -39,7 +39,7 @@ def rename_fastqs(path):
             samples.append(sample)
 
         if renaming:
-            os.system(f"mv {path} {fastq} {path} {fastq_new}")
+            os.system(f"mv {path}{fastq} {path}{fastq_new}")
 
     return samples
 
@@ -52,7 +52,7 @@ def write_sample_sheet(samples, path, outfile):
 
         for sample in samples:
             sheet.write(
-                f"{sample},{path} {sample}_R1.fastq.gz,{path} {sample}_R2.fastq.gz\n"
+                f"{sample},{path}{sample}_R1.fastq.gz,{path}{sample}_R2.fastq.gz\n"
             )
 
 

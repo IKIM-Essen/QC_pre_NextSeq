@@ -52,20 +52,30 @@ def get_trimmed_fastq(wildcards):
 
 
 def get_human_ref():
-    file = config["human-ref"].split("/")[-1]
-    local_ref = "{}{}".format(get_resource_path(), file)
+    if config["human-ref"]["use-local"]:
+        path=config["human-ref"]["local-path"]
+    else:
+        path=config["human-ref"]["download-path"]
+    local_ref = "{}{}".format(get_resource_path(), path.split("/")[-1])
     return local_ref
 
 
-def get_kraken_url():
-    return config["kraken"]["download-path"]
+def get_kraken_db_url():
+    return config["kraken-db"]["download-path"]
 
 
 def get_kraken_db_file():
-    url = get_kraken_url()
-    db_name = (Path(url).name).rsplit("_", 1)[0]
+    if config["kraken-db"]["use-local"]:
+        path = config["kraken-db"]["local-path"]
+    else:
+        path = get_kraken_db_url()
+    db_name = (Path(path).name).rsplit("_", 1)[0]
     file = "{}{}/hash.k2d".format(get_resource_path(), db_name)
     return file
+    
+
+def get_kraken_db_tar():
+    return Path(config["kraken-db"]["local-path"]).name
 
 
 def get_kraken_report(wildcards):
