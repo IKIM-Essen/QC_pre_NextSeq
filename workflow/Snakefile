@@ -41,7 +41,7 @@ rule all:
 onsuccess:
     print("Workflow finished without an error.")
     if os.path.exists("results/{date}/report/{date}_report.zip".format(date=DATE)):
-        shell("tar cpfz results/{DATE}/{DATE}_results.tar.gz results/{DATE}/report/")
+        shell("cd results/{DATE}/ && tar cpfz {DATE}_results.tar.gz report/")
         print("You can find the results in {date}_results.tar.gz".format(date=DATE))
 
 
