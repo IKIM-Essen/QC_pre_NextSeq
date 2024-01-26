@@ -1,4 +1,5 @@
 if config["human-ref"]["use-local"]:
+
     rule copy_local_human_ref:
         output:
             fasta=temp(get_human_ref()),
@@ -16,6 +17,7 @@ if config["human-ref"]["use-local"]:
             "cp {params.local} {output.fasta}) > {log} 2>&1"
 
 else:
+
     rule download_human_ref:
         output:
             fasta=get_human_ref(),

@@ -1,11 +1,12 @@
 if config["kraken-db"]["use-local"]:
+
     rule copy_local_kraken_db:
         output:
             hfile=get_kraken_db_file(),
         params:
             local=config["kraken-db"]["local-path"],
             db_folder=lambda wildcards, output: Path(output.hfile).parent,
-            resource_folder=get_resource_path(),
+            resource_folder=lambda wildcards, output: Path(output.hfile).parent.parent,
             filename=get_kraken_db_tar(),
         log:
             "logs/kraken2_DB_local_copy.log",
@@ -17,9 +18,10 @@ if config["kraken-db"]["use-local"]:
             "(mkdir -p {params.db_folder}/ && "
             "cp {params.local} {params.resource_folder}/ && "
             "tar fzxv {params.resource_folder}{params.filename} -C {params.db_folder}/ && "
-            "rm {params.resource_folder}{params.filename}) > {log} 2>&1" #
+            "rm {params.resource_folder}{params.filename}) > {log} 2>&1"
 
 else:
+
     rule download_kraken_db:
         output:
             hfile=get_kraken_db_file(),
