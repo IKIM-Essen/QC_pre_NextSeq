@@ -2,12 +2,39 @@ pepfile: config/pep/config.yaml
 
 run-date: "test"
 
+testing: True
+
 adapter-seqs: "-a GCGAATTTCGACGATCGTTGCATTAACTCGCGAA -g AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
 
+## Option for the auto-creation of the sample sheet
+sample-sheet:
+  # False or True : Should the sample sheet be auto-created?
+  auto-creation: False
+  # False or True : Should the sample fastqs be renamed?
+  # e.g. from sampleID_S40_L001_R1_001.fastq.gz to sampleID_R1.fastq.gz
+  rename-sample-files: False
+  # path to the fastq files of the samples for the sample sheet
+  data-path: "/path/to/Miseq/runfolder/"
+
 data-handling:
-  # path to store data within the workflow
+  # path to store input fastq data within the workflow
   data: "data/"
+  # path to store databases and reference genomes used within the workflow
   resources: "resources/"
+
+human-ref:
+  use-local: False
+  # path to a locally stored human reference genome
+  local-path: "/groups/ds/databases_refGenomes/refGenomes/latest/human/GCA_000001405.29_GRCh38.p14_genomic.fna.gz"
+  # if use-local = False the reference genome is downloaded via the following link
+  download-path: "https://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens/annotation/GRCh38_latest/refseq_identifiers/GRCh38_latest_genomic.fna.gz"
+
+kraken-db:
+  use-local: False
+  # path to a locally stored kraken2 database
+  local-path: "/groups/ds/databases_refGenomes/databases/latest/kraken2/standard-8/k2_standard_08gb_20231009.tar.gz"
+  # if use-local = False the kraken2 database is downloaded via the following link
+  download-path: "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20231009.tar.gz"
 
 quality-criteria:
   # minimal length of acceptable reads
@@ -15,4 +42,5 @@ quality-criteria:
   # average quality of acceptable reads (PHRED)
   min-PHRED: 20
 
-human-ref: "https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.29_GRCh38.p14/GCA_000001405.29_GRCh38.p14_genomic.fna.gz"
+## string term used for formatting output tables
+tablular-config: '/>github<\/a>/a \\t\t\t</li>\n\t\t\t<li class="nav-item"> \n\t\t\t\t<a class="nav-link" href="#">'

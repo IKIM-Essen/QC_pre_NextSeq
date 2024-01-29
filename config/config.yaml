@@ -3,6 +3,8 @@ pepfile: config/pep/config.yaml
 ## this will be used as name for the results folder and can be found in the report
 run-date: "23_12_18"
 
+testing: False
+
 ## adapter sequences used for trimming
 adapter-seqs: "-a GCGAATTTCGACGATCGTTGCATTAACTCGCGAA -g AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
 
