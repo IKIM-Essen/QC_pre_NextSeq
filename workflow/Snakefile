@@ -33,7 +33,7 @@ if config["testing"]:
                 date=DATE,
                 level=get_tax_levels(),
             ),
-            expand("results/{date}/report/filtering_summary/", date=DATE),
+            expand(directory("results/{date}/report/filtering_summary/"), date=DATE),
             expand("results/{date}/report/qc/multiqc.html", date=DATE),
             expand("results/{date}/report/plots/read_summary.html", date=DATE),
             expand("results/{date}/report/plots/read_summary.html", date=DATE),
