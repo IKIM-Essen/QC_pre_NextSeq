@@ -37,7 +37,6 @@ rule summary2report:
     input:
         "results/{date}/report/filtering_summary.csv",
     output:
-        "results/{date}/report/filtering_summary/index.html",
         report(
             directory("results/{date}/report/filtering_summary/"),
             htmlindex="index.html",
