@@ -48,6 +48,6 @@ jobs:
       - name: Test report
         uses: snakemake/snakemake-github-action@v1.24.0
         with:
-          directory: .test
+          directory: .tests
           snakefile: workflow/Snakefile
           args: "--nolock --report report.zip"
