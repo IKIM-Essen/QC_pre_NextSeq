@@ -24,18 +24,34 @@ if config["sample-sheet"]["auto-creation"]:
 
 DATE = get_run_date()
 
+if config["testing"]:
 
-rule all:
-    input:
-        expand(
-            "results/{date}/report/{date}_report.zip",
-            date=DATE,
-        ),
-        expand(
-            "results/{date}/report/bracken/merged.bracken_{level}.txt",
-            date=DATE,
-            level=get_tax_levels(),
-        ),
+    rule all:
+        input:
+            expand(
+                "results/{date}/report/bracken/merged.bracken_{level}.txt",
+                date=DATE,
+                level=get_tax_levels(),
+            ),
+            expand("results/{date}/report/filtering_summary/", date=DATE),
+            expand("results/{date}/report/qc/multiqc.html", date=DATE),
+            expand("results/{date}/report/plots/read_summary.html", date=DATE),
+            expand("results/{date}/report/plots/read_summary.html", date=DATE),
+            expand("results/{date}/report/plots/domain_abundance.html", date=DATE),
+
+else:
+
+    rule all:
+        input:
+            expand(
+                "results/{date}/report/{date}_report.zip",
+                date=DATE,
+            ),
+            expand(
+                "results/{date}/report/bracken/merged.bracken_{level}.txt",
+                date=DATE,
+                level=get_tax_levels(),
+            ),
 
 
 onsuccess:
@@ -43,6 +59,7 @@ onsuccess:
     if os.path.exists("results/{date}/report/{date}_report.zip".format(date=DATE)):
         shell("cd results/{DATE}/ && tar cpfz {DATE}_results.tar.gz report/")
         print("You can find the results in {date}_results.tar.gz".format(date=DATE))
+
 
 
 onerror:
