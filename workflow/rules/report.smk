@@ -62,6 +62,7 @@ rule summary2report:
 
 
 if not config["testing"]:
+
     rule snakemake_report:
         input:
             "results/{date}/report/filtering_summary/",
