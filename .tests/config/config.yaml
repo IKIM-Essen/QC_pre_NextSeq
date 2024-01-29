@@ -2,6 +2,8 @@ pepfile: config/pep/config.yaml
 
 run-date: "test"
 
+testing: True
+
 adapter-seqs: "-a GCGAATTTCGACGATCGTTGCATTAACTCGCGAA -g AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
 
 ## Option for the auto-creation of the sample sheet

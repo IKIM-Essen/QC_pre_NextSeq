@@ -61,19 +61,20 @@ rule summary2report:
         "cp {params.styles}* {output}/css/ > {log} 2>&1"
 
 
-rule snakemake_report:
-    input:
-        "results/{date}/report/filtering_summary/",
-        "results/{date}/report/qc/multiqc.html",
-        rules.qc_diversity_summary.output.read_summary_html,
-        rules.qc_diversity_summary.output.human_cont_html,
-        rules.qc_diversity_summary.output.domain_abd_html,
-    output:
-        "results/{date}/report/{date}_report.zip",
-    log:
-        "logs/{date}/snakemake-report.log",
-    conda:
-        "../envs/snakemake.yaml"
-    shell:
-        "snakemake --nolock --report {output} "
-        "> {log} 2>&1"
+if not config["testing"]:
+    rule snakemake_report:
+        input:
+            "results/{date}/report/filtering_summary/",
+            "results/{date}/report/qc/multiqc.html",
+            rules.qc_diversity_summary.output.read_summary_html,
+            rules.qc_diversity_summary.output.human_cont_html,
+            rules.qc_diversity_summary.output.domain_abd_html,
+        output:
+            "results/{date}/report/{date}_report.zip",
+        log:
+            "logs/{date}/snakemake-report.log",
+        conda:
+            "../envs/snakemake.yaml"
+        shell:
+            "snakemake --nolock --report {output} "
+            "> {log} 2>&1"
