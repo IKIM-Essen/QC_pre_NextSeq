@@ -33,10 +33,10 @@ if config["testing"]:
                 date=DATE,
                 level=get_tax_levels(),
             ),
-            directory(expand("results/{date}/report/filtering_summary/", date=DATE)),
+            expand("results/{date}/report/filtering_summary/index.html", date=DATE),
             expand("results/{date}/report/qc/multiqc.html", date=DATE),
             expand("results/{date}/report/plots/read_summary.html", date=DATE),
-            expand("results/{date}/report/plots/read_summary.html", date=DATE),
+            expand("results/{date}/report/plots/human_contamination.html", date=DATE),
             expand("results/{date}/report/plots/domain_abundance.html", date=DATE),
 
 else:
