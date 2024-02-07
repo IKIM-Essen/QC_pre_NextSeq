@@ -2,4 +2,6 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - snakemake=8.1.2
+  - snakemake=8.4.2
+  - pip:
+    - snakemake-storage-plugin-fs

@@ -10,6 +10,10 @@
 !config/pep
 !config/pep/config.yaml
 !config/pep/samples.csv
+!resources
+!resources/*
+!resources/report/*
+!resources/report/tables/*
 !workflow
 !workflow/*
 !workflow/envs/*
@@ -22,3 +26,4 @@
 !README.md
 workflow/scripts/test_cont_plot.ipynb
 workflow/scripts/old_*
+resources/GCA_000001405.29_GRCh38.p14_genomic.fna.gz

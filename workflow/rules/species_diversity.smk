@@ -17,8 +17,8 @@ if config["kraken-db"]["use-local"]:
         shell:
             "(mkdir -p {params.db_folder}/ && "
             "cp {params.local} {params.resource_folder}/ && "
-            "tar fzxv {params.resource_folder}{params.filename} -C {params.db_folder}/ && "
-            "rm {params.resource_folder}{params.filename}) > {log} 2>&1"
+            "tar fzxv {params.resource_folder}/{params.filename} -C {params.db_folder}/ && "
+            "rm {params.resource_folder}/{params.filename}) > {log} 2>&1"
 
 else:
 
