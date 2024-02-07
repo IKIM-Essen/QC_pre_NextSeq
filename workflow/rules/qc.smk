@@ -15,7 +15,8 @@ rule local_fastqs:
         "../envs/unix.yaml"
     shell:
         "(mkdir -p {params.outdir} && "
-        "cp -v -t {params.outdir} {input}) > {log} 2>&1"
+        "cp -v {input[0]} {output.raw1} && "
+        "cp -v {input[1]} {output.raw2}) > {log} 2>&1"
 
 
 rule fastp:
