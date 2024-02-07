@@ -104,12 +104,12 @@ flowchart TB;
 
       %% Nodes
       A[/Illumina paired end reads/]
-      B["<b>Trimming and Filtering</b> <br> <i>fastp<i>"]
-      C["<b>Quality control</b> <br> <i>fastQC<i>"]
+      B["Trimming and Filtering <br> fastp"]
+      C["Quality control <br> fastQC"]
       D[/MultiQC report/]
-      E["<b>Taxonomy Assignment</b> <br> <i>Kraken 2<i>"]
-      F["<b>Abundance Analysis</b> <br> <i>Bracken<i>"]
-      G["<b>Mapping against human genome</b> <br> <i>minimap2</i>"]
+      E["Taxonomy Assignment <br> Kraken 2"]
+      F["Abundance Analysis <br> Bracken"]
+      G["Mapping against human genome <br> minimap2"]
       H[/Snakemake report/]
       
 
