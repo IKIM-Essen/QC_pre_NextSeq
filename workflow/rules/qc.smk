@@ -3,7 +3,7 @@ RAW_DATA_PATH = get_data_path()
 
 rule local_fastqs:
     input:
-        get_fastqs,
+        fastqs=get_fastqs,
     output:
         raw1=temp(f"{RAW_DATA_PATH}{{date}}/{{sample}}_R1.fastq.gz"),
         raw2=temp(f"{RAW_DATA_PATH}{{date}}/{{sample}}_R2.fastq.gz"),
@@ -15,8 +15,8 @@ rule local_fastqs:
         "../envs/unix.yaml"
     shell:
         "(mkdir -p {params.outdir} && "
-        "cp -v {input[0]} {output.raw1} && "
-        "cp -v {input[1]} {output.raw2}) > {log} 2>&1"
+        "cp -v {input.fastqs[0]} {output.raw1} && "
+        "cp -v {input.fastqs[1]} {output.raw2}) > {log} 2>&1"
 
 
 rule fastp:
