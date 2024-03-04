@@ -7,13 +7,14 @@ sys.stderr = open(snakemake.log[0], "w")
 
 inpath = snakemake.params.inpath
 renaming = snakemake.params.renaming
-sample_csv = snakemake.input[0]
+sample_csv = snakemake.output[0]
 
 
 def rename_fastqs(path):
     samples = []
     
     fastqs = [file for file in os.listdir(path) if file.endswith(".fastq.gz")]
+    print(fastqs)
     if not fastqs:
         print(
             f"Error: There are no fastq files in the directory. Have you used the correct path: {path}?"

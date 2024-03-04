@@ -1,5 +1,5 @@
 rule create_sample_sheet:
-    input:
+    output:
         "config/pep/samples.csv",
     params:
         inpath=config["sample-sheet"]["data-path"],
