@@ -1,36 +1,15 @@
-RAW_DATA_PATH = get_data_path()
-
-
-rule local_fastqs:
+rule fastp_pe:
     input:
-        fastqs=get_fastqs,
-    output:
-        raw1=temp(f"{RAW_DATA_PATH}{{date}}/{{sample}}_R1.fastq.gz"),
-        raw2=temp(f"{RAW_DATA_PATH}{{date}}/{{sample}}_R2.fastq.gz"),
-    params:
-        outdir=lambda wildcards, output: Path(output.raw1).parent,
-    log:
-        "logs/{date}/copy_data/{sample}.log",
-    conda:
-        "../envs/unix.yaml"
-    shell:
-        "(mkdir -p {params.outdir} && "
-        "cp -v {input.fastqs[0]} {output.raw1} && "
-        "cp -v {input.fastqs[1]} {output.raw2}) > {log} 2>&1"
-
-
-rule fastp:
-    input:
-        sample=get_local_fastqs,
+        sample=get_fastqs,
     output:
         trimmed=temp(
             [
-                "results/{date}/qc/fastp/{sample}.1.fastq.gz",
-                "results/{date}/qc/fastp/{sample}.2.fastq.gz",
+                "results/{date}/qc/fastp-pe/{sample}.1.fastq.gz",
+                "results/{date}/qc/fastp-pe/{sample}.2.fastq.gz",
             ]
         ),
-        html=temp("results/{date}/qc/fastp/{sample}.html"),
-        json=temp("results/{date}/qc/fastp/{sample}.fastp.json"),
+        html=temp("results/{date}/qc/fastp-pe/{sample}.html"),
+        json=temp("results/{date}/qc/fastp-pe/{sample}.fastp.json"),
     params:
         adapters=get_adapters,
         extra="--qualified_quality_phred {phred} --length_required {minlen}".format(
@@ -38,7 +17,27 @@ rule fastp:
             minlen=(config["quality-criteria"]["min-length-reads"]),
         ),
     log:
-        "logs/{date}/qc/fastp/{sample}.log",
+        "logs/{date}/fastp/fastp-pe/{sample}.log",
+    threads: 2
+    wrapper:
+        "v3.3.3/bio/fastp"
+
+
+rule fastp_se:
+    input:
+        sample=get_fastqs,
+    output:
+        trimmed=temp("results/{date}/qc/fastp-se/{sample}.fastq.gz"),
+        html=temp("results/{date}/qc/fastp-se/{sample}.html"),
+        json=temp("results/{date}/qc/fastp-se/{sample}.fastp.json"),
+    params:
+        adapters=get_adapters,
+        extra="--qualified_quality_phred {phred} --length_required {minlen}".format(
+            phred=(config["quality-criteria"]["min-PHRED"]),
+            minlen=(config["quality-criteria"]["min-length-reads"]),
+        ),
+    log:
+        "results/{date}/qc/fastp-se/{sample}.log",
     threads: 2
     wrapper:
         "v3.3.3/bio/fastp"
@@ -62,12 +61,10 @@ rule fastqc:
 rule multiqc:
     input:
         expand(
-            [
-                "results/{{date}}/qc/fastqc/{sample}_fastqc.zip",
-                "results/{{date}}/qc/fastp/{sample}.fastp.json",
-            ],
+            "results/{{date}}/qc/fastqc/{sample}_fastqc.zip",
             sample=get_samples(),
         ),
+        get_fastp_results,
     output:
         report(
             "results/{date}/report/qc/multiqc.html",

@@ -1,5 +1,7 @@
 import os
 
+ILLUMINA = "illumina"
+ONT = "ont"
 
 configfile: "config/config.yaml"
 
@@ -20,19 +22,30 @@ def get_samples():
     return list(pep.sample_table["sample_name"].values)
 
 
+def get_technology(wildcards, sample=None):
+    if sample is None:
+        sample = wildcards.sample
+
+    return pep.sample_table.loc[sample]["technology"]
+
+
+def is_ont(wildcards, sample=None):
+    if sample is None:
+        return get_technology(wildcards) == ONT
+    return get_technology(None, sample) == ONT
+
+
+def is_illumina(wildcards, sample=None):
+    if sample is None:
+        return get_technology(wildcards) == ILLUMINA
+    return get_technology(None, sample) == ILLUMINA
+
+
 def get_fastqs(wildcards):
-    return (
-        pep.sample_table.loc[wildcards.sample]["fq1"],
-        pep.sample_table.loc[wildcards.sample]["fq2"],
-    )
-
-
-def get_local_fastqs(wildcards):
-    path = get_data_path()
-    return (
-        "{data}{{date}}/{{sample}}_R1.fastq.gz".format(data=path),
-        "{data}{{date}}/{{sample}}_R2.fastq.gz".format(data=path),
-    )
+    if is_illumina(wildcards):
+        return pep.sample_table.loc[wildcards.sample][["fq1", "fq2"]]
+    elif is_ont(wildcards):
+        return pep.sample_table.loc[wildcards.sample][["fq1"]]
 
 
 def get_adapters(wildcards):
@@ -40,10 +53,26 @@ def get_adapters(wildcards):
 
 
 def get_trimmed_fastqs(wildcards):
-    return [
-        "results/{date}/qc/fastp/{sample}.1.fastq.gz",
-        "results/{date}/qc/fastp/{sample}.2.fastq.gz",
-    ]
+    if is_illumina(wildcards):
+        return [
+            "results/{date}/qc/fastp-pe/{sample}.1.fastq.gz",
+            "results/{date}/qc/fastp-pe/{sample}.2.fastq.gz",
+        ]
+    elif is_ont(wildcards):
+        return ["results/{date}/qc/fastp-se/{sample}.fastq.gz"]
+
+
+def get_fastp_results(wildcards):
+    """Returns paths of files to aggregate the fastp results for the multiqc rule."""
+    # fastp is only used on Illumina and Ion Torrent data
+    files = []
+    samples = get_samples()
+    for sample in samples:
+        if is_illumina(None, sample):
+            files.append("results/{{date}}/qc/fastp-pe/{sample}.fastp.json".format(sample=sample))
+        elif is_ont(None, sample):
+            files.append("results/{{date}}/qc/fastp-se/{sample}.fastp.json".format(sample=sample))
+    return files
 
 
 def get_trimmed_fastq(wildcards):

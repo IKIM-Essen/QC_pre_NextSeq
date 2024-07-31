@@ -256,10 +256,10 @@ def save_summary_csv(domain_abundance_df, human_cont_df, read_quality_df, outfil
 
     df_all_for_csv = pd.concat([domain_abundance_for_csv, human_cont_for_csv], axis=1)
 
-    header = ["Human", "Bacteria", "Eukaryota", "Archaea", "Viruses"]
-    new_cols = [s + " (%)" for s in header]
-    df_all_for_csv = df_all_for_csv[header]
-    df_all_for_csv.columns = new_cols
+    # header = ["Human", "Bacteria", "Eukaryota", "Archaea", "Viruses"]
+    # new_cols = [s + " (%)" for s in header]
+    # df_all_for_csv = df_all_for_csv[header]
+    # df_all_for_csv.columns = new_cols
 
     df_all_for_csv = df_all_for_csv.mul(100)
     df_all_for_csv = df_all_for_csv.astype("float64").round(3)
