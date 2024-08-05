@@ -49,6 +49,9 @@ rule kraken2:
         outfile=temp("results/{date}/diversity/kraken_outfiles/{sample}_outfile.tsv"),
     params:
         db=lambda wildcards, input: Path(input.hfile).parent,
+        flag=lambda wildcards: "--paired"
+        if is_illumina(wildcards)
+        else ""
     threads: 32
     log:
         "logs/{date}/kraken2_run/{sample}.log",
@@ -57,7 +60,7 @@ rule kraken2:
     conda:
         "../envs/kraken_based.yaml"
     shell:
-        "kraken2 --db {params.db} --threads {threads} --quick --paired "
+        "kraken2 --db {params.db} --threads {threads} --quick {params.flag} "
         "--output {output.outfile} --report {output.report} "
         "--gzip-compressed {input.fastqs} > {log} 2>&1"
 

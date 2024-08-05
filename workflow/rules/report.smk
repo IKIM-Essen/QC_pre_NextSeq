@@ -1,9 +1,6 @@
 rule qc_diversity_summary:
     input:
-        jsons=expand(
-            "results/{{date}}/qc/fastp/{sample}.fastp.json",
-            sample=get_samples(),
-        ),
+        jsons=lambda wildcards: get_fastp_results(wildcards),
         stats=expand(
             "results/{{date}}/contamination/{sample}_stats.txt", sample=get_samples()
         ),
