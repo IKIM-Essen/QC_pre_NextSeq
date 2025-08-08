@@ -34,9 +34,9 @@ human-ref:
 kraken-db:
   use-local: True
   # path to a locally stored kraken2 database
-  local-path: "/groups/ds/databases_refGenomes/databases/latest/kraken2/standard-8/k2_standard_08gb_20231009.tar.gz"
-  # if use-local = False the kraken2 database is downloaded via the following link
-  download-path: "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20231009.tar.gz"
+  local-path: "/groups/ds/databases_refGenomes/databases/latest/kraken2/standard-8/k2_standard_08gb_20240904.tar.gz"
+  # if use-local = False the kraken2 database will be downloaded:
+  download-path: "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240904.tar.gz"
 
 ## qualtiy criteria used for filtering
 quality-criteria:
