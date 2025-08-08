@@ -77,4 +77,5 @@ if not config["testing"]:
         conda:
             "../envs/snakemake.yaml"
         shell:
-            "snakemake --nolock --report {output} --profile '' > {log} 2>&1"
+            "snakemake --nolock --report {output} "
+            "--profile '' > {log} 2>&1"
