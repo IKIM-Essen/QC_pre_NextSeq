@@ -1,2 +1,2 @@
 sample_name,fq1,fq2
-sample_ , path/to/read1, path/to/read/2
+sampleID,path/to/read1,path/to/read/2
