@@ -78,4 +78,4 @@ if not config["testing"]:
             "../envs/snakemake.yaml"
         shell:
             "snakemake --nolock --report {output} "
-            "> {log} 2>&1"
+            "--profile '' > {log} 2>&1"
