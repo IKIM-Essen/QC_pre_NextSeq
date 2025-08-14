@@ -1,6 +1,7 @@
 RAW_DATA_PATH = get_data_path()
 from pathlib import Path
 
+
 rule local_fastqs:
     input:
         fastqs=get_fastqs,
