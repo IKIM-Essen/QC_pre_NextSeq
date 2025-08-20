@@ -14,7 +14,7 @@ Snakemake is best installed via the [Mamba package manager](https://github.com/m
 Given that Mamba is installed, run
 
 ```sh
-    mamba create -c conda-forge -c bioconda -n snakemake \
+    mamba create -c conda-forge -c bioconda -name snakemake \
     snakemake snakemake-storage-plugin-fs
 ```
 
