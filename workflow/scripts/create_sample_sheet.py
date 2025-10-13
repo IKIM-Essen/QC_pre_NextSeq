@@ -7,7 +7,7 @@ sys.stderr = open(snakemake.log[0], "w")
 
 inpath = snakemake.params.inpath
 renaming = snakemake.params.renaming
-sample_csv = snakemake.input[0]
+sample_csv = snakemake.output[0]
 
 
 def rename_fastqs(path):
