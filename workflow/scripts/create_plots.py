@@ -148,6 +148,75 @@ def plot_domain_abundance(domain_abundance_df, out_html):
 
     bars.save(out_html)
 
+    
+def plot_domain_blocks(domain_abundance_df, out_html):
+    melt_df = domain_abundance_df.melt(
+        id_vars=["sample"], var_name="Domain", value_name="share"
+    )
+    melt_df["share_percent"] = melt_df["share"] * 100
+
+    # Grouping Minor & Major
+    major_domains = ["Bacteria"]
+    melt_df["Group"] = melt_df["Domain"].apply(
+        lambda d: "Major domains" if d in major_domains else "Minor domains"
+    )
+
+
+    color_scale = alt.Scale(scheme="tableau20")
+
+    major_chart = (
+        alt.Chart(melt_df)
+        .transform_filter(alt.datum.Group == "Major domains")
+        .mark_bar(size=10, stroke="white", strokeWidth=0.5)
+        .encode(
+            y=alt.Y("sample:N", title="Sample", sort=None),
+            x=alt.X(
+                "sum(share_percent):Q",
+                stack="normalize", 
+                title="Relative abundance (%)"
+            ),
+            color=alt.Color("Domain:N", scale=color_scale, title=None),
+            tooltip=[
+                alt.Tooltip("Domain:N"),
+                alt.Tooltip("share_percent:Q", format=".2f", title="Abundance (%)"),
+            ],
+        )
+        .properties(width=800, height=80, title="Major domains")
+    )
+
+    minor_chart = (
+        alt.Chart(melt_df)
+        .transform_filter(alt.datum.Group == "Minor domains")
+        .mark_bar(size=10, stroke="white", strokeWidth=0.5)
+        .encode(
+            y=alt.Y("sample:N", title="Sample", sort=None),
+            x=alt.X(
+                "sum(share_percent):Q",
+                stack=None,  
+                title="Relative abundance (%)",
+                scale=alt.Scale(domain=[0, 1])  
+            ),
+            color=alt.Color("Domain:N", scale=color_scale, title=None),
+            tooltip=[
+                alt.Tooltip("Domain:N"),
+                alt.Tooltip("share_percent:Q", format=".2f", title="Abundance (%)"),
+            ],
+        )
+        .properties(width=800, height=80, title="Minor domains (zoomed 0 – 1%)")
+    )
+
+    chart = alt.vconcat(major_chart, minor_chart).resolve_scale(color="shared")
+
+    chart = chart.configure_axis(
+        labelFontSize=12,
+        titleFontSize=14
+    ).configure_legend(
+        labelFontSize=12,
+        titleFontSize=14
+    ).configure_title(fontSize=16)
+
+    chart.save(out_html)
+
 
 def get_qc_filtering_dataframes(json_files):
     ## contains number of reads before and after filtering & number of bases
@@ -275,6 +344,7 @@ plot_human_contamination(human_cont_df, contamination_html)
 
 domain_abundance_df = get_domain_abundance_df(bracken_domain)
 plot_domain_abundance(domain_abundance_df, domain_abundance_html)
+plot_domain_blocks(domain_abundance_df, block_plot_html)
 
 filtering_results_df, read_quality_df = get_qc_filtering_dataframes(json_files)
 plot_filtering_results(filtering_results_df, filtering_html)
