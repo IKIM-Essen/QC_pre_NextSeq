@@ -24,6 +24,10 @@ rule qc_diversity_summary:
             "results/{date}/report/plots/domain_abundance.html",
             category="4. Domain level abundance plot",
         ),
+        domain_blocks_html=report(                          
+            "results/{date}/report/plots/domain_blocks.html",
+            category="5. Domain block plot",
+        ),
     log:
         "logs/{date}/summary_and_plots.log",
     threads: 4
@@ -70,6 +74,7 @@ if not config["testing"]:
             rules.qc_diversity_summary.output.read_summary_html,
             rules.qc_diversity_summary.output.human_cont_html,
             rules.qc_diversity_summary.output.domain_abd_html,
+            rules.qc_diversity_summary.output.domain_blocks_html,
         output:
             "results/{date}/report/{date}_report.zip",
         log:
