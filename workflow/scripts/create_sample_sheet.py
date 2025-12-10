@@ -34,7 +34,11 @@ def rename_fastqs(path):
         fastq_new = re.sub(r"_S\d{0,2}_L001", "", fastq)
         fastq_new = re.sub(r"_001.fastq", ".fastq", fastq_new)
 
-        sample = (re.search("(.*)_R[1-2].fastq.gz", fastq_new)).group(1)
+        match = re.search("(.*)_R[1-2].fastq.gz", fastq_new)
+        if not match:
+            continue
+
+        sample = match.group(1)
         if sample not in samples and sample != "Undetermined":
             samples.append(sample)
 
@@ -51,9 +55,19 @@ def write_sample_sheet(samples, path, outfile):
         sheet.write("sample_name,fq1,fq2\n")
 
         for sample in samples:
-            sheet.write(
-                f"{sample},{path}{sample}_R1.fastq.gz,{path}{sample}_R2.fastq.gz\n"
-            )
+            r1 = f"{path}{sample}_R1.fastq.gz"
+            r2 = f"{path}{sample}_R2.fastq.gz"
+
+            ## check that the FASTQs exist and are not empty
+            if not os.path.exists(r1) or not os.path.exists(r2):
+                print(f"Skipping sample {sample}: FASTQ files missing.")
+                continue
+
+            if os.path.getsize(r1) == 0 or os.path.getsize(r2) == 0:
+                print(f"Skipping sample {sample}: FASTQ files are empty.")
+                continue
+
+            sheet.write(f"{sample},{r1},{r2}\n")
 
 
 samples = rename_fastqs(inpath)
