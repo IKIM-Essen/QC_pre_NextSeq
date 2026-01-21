@@ -71,6 +71,7 @@ if not config["testing"]:
             rules.qc_diversity_summary.output.read_summary_html,
             rules.qc_diversity_summary.output.human_cont_html,
             rules.qc_diversity_summary.output.domain_abd_html,
+            rules.qc_diversity_summary.output.domain_blocks_html,
         output:
             "results/{date}/report/{date}_report.zip",
         log:
