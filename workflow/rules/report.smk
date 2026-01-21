@@ -21,6 +21,10 @@ rule qc_diversity_summary:
             "results/{date}/report/plots/domain_abundance.html",
             category="4. Domain level abundance plot",
         ),
+        domain_blocks_html=report(                          
+            "results/{date}/report/plots/domain_blocks.html",
+            category="5. Domain block plot",
+        ),
     log:
         "logs/{date}/summary_and_plots.log",
     threads: 4
@@ -75,4 +79,4 @@ if not config["testing"]:
             "../envs/snakemake.yaml"
         shell:
             "snakemake --nolock --report {output} "
-            "> {log} 2>&1"
+            "--profile '' > {log} 2>&1"
