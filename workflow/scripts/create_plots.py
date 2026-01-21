@@ -10,13 +10,14 @@ sys.stderr = open(snakemake.log[0], "w")
 
 ## input files
 stat_files = snakemake.input.stats
-bracken_domain = snakemake.input.bracken
+bracken_domain = snakemake.input.get("bracken", None)
 json_files = snakemake.input.jsons
 
 
 ## output files
 contamination_html = snakemake.output.human_cont_html  # "conta.html" #
 domain_abundance_html = snakemake.output.domain_abd_html  #'domain_abundance.html' #
+block_plot_html = snakemake.output.domain_blocks_html
 filtering_html = snakemake.output.read_summary_html  #'filtering_summary.html' #
 summary_out_csv = snakemake.output.summary_csv  # "summary.csv" #
 
@@ -29,49 +30,36 @@ color_green = "#6aa84f"
 def get_human_contamination_df(stat_files):
     sum_dict = {}
     for stats_path in stat_files:
-        # file=stats_path.split("/")[-1]
-        sample = (re.search("(.*)_stats.txt", os.path.basename(stats_path))).group(1)
+        sample = re.search("(.*)_stats.txt", os.path.basename(stats_path)).group(1)
         sample_sum_dict = {}
         with open(stats_path, "r") as stats:
             for line in stats:
                 if line.startswith("SN	sequences"):
                     total = line.split(":")[-1].strip()
-                    continue
+                    
                 elif line.startswith("SN	reads mapped"):
                     mapped = line.split(":")[-1].strip()
-                    # sample_sum_dict["reads_mapped"] =int(mapped)
-
-                    prc = int(mapped) / int(total)
-                    sample_sum_dict["Human"] = prc  # "%.6f" %
+                    prc = float(mapped) / float(total) * 100 
+                    sample_sum_dict["Human"] = prc
                     break
-
+                
         sum_dict[sample] = sample_sum_dict
 
     human_cont_df = pd.DataFrame.from_dict(sum_dict, orient="index")
-    human_cont_df = human_cont_df.reset_index()
-    human_cont_df.rename(columns={"index": "sample"}, inplace=True)
+    human_cont_df = human_cont_df.reset_index().rename(columns={"index": "sample"})
     human_cont_df.sort_values(by=["sample"], inplace=True)
-
-    # human_cont_df.to_csv(out_csv)
     return human_cont_df
 
 
 def plot_human_contamination(human_cont_df, out_html):
-    slider = alt.binding_range(
-        min=0, max=100, step=0.5, name="max human contamination:"
-    )
-    # selector = alt.param(name='SelectorName', value=50, bind=slider)
-    selector = alt.selection_point(
-        name="SelectorName", fields=["max_contamination"], bind=slider, value=50
-    )
-
-    # ,title="% human contamination"
+    slider = alt.binding_range(min=0, max=100, step=0.5, name="max human contamination:")
+    selector = alt.selection_point(name="SelectorName", fields=["max_contamination"], bind=slider, value=50)
     base_chart = (
         alt.Chart(human_cont_df)
         .encode(
             alt.X("Human:Q")
             .axis(format="%", labelFontSize=12, titleFontSize=15)
-            .title("human contamination"),
+            .title("Human contamination"),
             alt.Y("sample:N").axis(labelFontSize=12, titleFontSize=15),
         )
         .add_params(selector)
@@ -81,22 +69,17 @@ def plot_human_contamination(human_cont_df, out_html):
 
     bars = base_chart.mark_bar().encode(
         color=alt.condition(
-            (alt.datum.Human * 100) >= selector.max_contamination,
+            (alt.datum.Human) >= selector.max_contamination,
             alt.value(color_red),
             alt.value(color_green),
-        )
+        ),
+        tooltip=[
+            alt.Tooltip("sample:N", title="Sample"),
+            alt.Tooltip("Human:Q", format=".4f", title="Human contamination (%)"),
+        ]
     )
 
-    chart_text = base_chart.mark_text(
-        align="center",
-        baseline="middle",
-        dx=20,
-        fontSize=12,
-    ).encode(
-        text=alt.Text("Human:Q", format=".2%"),
-    )
-
-    full_chart = bars + chart_text
+    full_chart = bars
     full_chart.save(out_html)
 
 
@@ -147,7 +130,110 @@ def plot_domain_abundance(domain_abundance_df, out_html):
     ).configure_title(fontSize=18)
 
     bars.save(out_html)
+    
+     
+def plot_domain_blocks(domain_abundance_df, out_html):
+    
+    melt_df = domain_abundance_df.melt(
+        id_vars=["sample"], var_name="Domain", value_name="share"
+    )
+    melt_df["share_percent"] = melt_df["share"] * 100
 
+    # Major vs. Minor
+    major_domains = ["Bacteria"]
+    melt_df["Group"] = melt_df["Domain"].apply(
+        lambda d: "Major domains" if d in major_domains else "Minor domains"
+    )
+
+    color_scale = alt.Scale(scheme="tableau20")
+
+    # scaling
+    n_samples = melt_df["sample"].nunique()
+    bar_size = max(6, min(20, 300 // n_samples)) 
+    plot_height = n_samples * (bar_size + 6)   
+
+    minor_values = melt_df.loc[melt_df["Group"] == "Minor domains", "share_percent"]
+    if not minor_values.empty:
+        q1, q3 = minor_values.quantile([0.25, 0.75])
+        iqr = q3 - q1
+        upper_bound = q3 + 1.5 * iqr
+        minor_limit = min(max(minor_values.max(), 0.1), upper_bound * 1.1)
+    else:
+        minor_limit = 1.0
+
+    y_encoding = alt.Y(
+        "sample:N",
+        title="Sample",
+        sort=None,
+        axis=alt.Axis(labelFontSize=12, titleFontSize=14, labelLimit=200)
+    )
+
+    major_chart = (
+        alt.Chart(melt_df)
+        .transform_filter(alt.datum.Group == "Major domains")
+        .mark_bar(size=bar_size, stroke="white", strokeWidth=0.5)
+        .encode(
+            y=y_encoding,
+            x=alt.X(
+                "sum(share_percent):Q",
+                stack="normalize",
+                title="Relative abundance (%)",
+                axis=alt.Axis(format=".0f")
+            ),
+            color=alt.Color("Domain:N", scale=color_scale, title=None),
+            tooltip=[
+                alt.Tooltip("sample:N", title="Sample"),
+                alt.Tooltip("Domain:N"),
+                alt.Tooltip("share_percent:Q", format=".2f", title="Abundance (%)"),
+            ],
+        )
+        .properties(
+            width=800,
+            height=plot_height,
+            title="Major domains"
+        )
+    )
+
+    minor_chart = (
+        alt.Chart(melt_df)
+        .transform_filter(alt.datum.Group == "Minor domains")
+        .mark_bar(size=bar_size, stroke="white", strokeWidth=0.5)
+        .encode(
+            y=y_encoding,
+            x=alt.X(
+                "sum(share_percent):Q",
+                stack=None,
+                title="Relative abundance (%)",
+                scale=alt.Scale(domain=[0, 0.40]),  # scale until 0.45 %
+                axis=alt.Axis(format=".2f")
+            ),
+            color=alt.Color("Domain:N", scale=color_scale, title=None),
+            tooltip=[
+                alt.Tooltip("sample:N", title="Sample"),
+                alt.Tooltip("Domain:N"),
+                alt.Tooltip("share_percent:Q", format=".4f", title="Abundance (%)"),
+            ],
+        )
+        .properties(
+            width=800,
+            height=plot_height,
+            title="Minor domains (zoomed 0–0.4%)"
+        )
+    )
+
+    chart = alt.vconcat(major_chart, minor_chart).resolve_scale(
+        color="shared", y="shared"
+    )
+
+    chart = (
+        chart.configure_axis(labelFontSize=12, titleFontSize=14, labelLimit=250)
+        .configure_legend(labelFontSize=12, titleFontSize=14)
+        .configure_title(fontSize=16, anchor="start")
+        .configure_view(strokeWidth=0)
+    )
+
+    chart.save(out_html)
+    
 
 def get_qc_filtering_dataframes(json_files):
     ## contains number of reads before and after filtering & number of bases
@@ -247,19 +333,26 @@ def plot_filtering_results(filt_results_df, out_html):
     full_chart.save(out_html)
 
 
-def save_summary_csv(domain_abundance_df, human_cont_df, read_quality_df, outfile):
-    domain_abundance_for_csv = domain_abundance_df.copy()
-    domain_abundance_for_csv.set_index("sample", inplace=True)
-
+def save_summary_csv(human_cont_df, read_quality_df, outfile, domain_abundance_df=None):
+    if domain_abundance_df is not None:
+        domain_abundance_for_csv = domain_abundance_df.copy()
+        domain_abundance_for_csv.set_index("sample", inplace=True)
+    else:
+        domain_abundance_for_csv = pd.DataFrame(index=human_cont_df["sample"])
+    
     human_cont_for_csv = human_cont_df.copy()
     human_cont_for_csv.set_index("sample", inplace=True)
 
     df_all_for_csv = pd.concat([domain_abundance_for_csv, human_cont_for_csv], axis=1)
 
-    # header = ["Human", "Bacteria", "Eukaryota", "Archaea", "Viruses"]
-    # new_cols = [s + " (%)" for s in header]
-    # df_all_for_csv = df_all_for_csv[header]
-    # df_all_for_csv.columns = new_cols
+    # formate domains
+    header = ["Human", "Bacteria", "Eukaryota", "Archaea", "Viruses"]
+    new_cols = [s + " (%)" for s in header]
+    for col in header:
+        if col not in df_all_for_csv.columns:
+            df_all_for_csv[col] = 0
+    df_all_for_csv = df_all_for_csv[header]
+    df_all_for_csv.columns = new_cols
 
     df_all_for_csv = df_all_for_csv.mul(100)
     df_all_for_csv = df_all_for_csv.astype("float64").round(3)
@@ -275,8 +368,9 @@ plot_human_contamination(human_cont_df, contamination_html)
 
 domain_abundance_df = get_domain_abundance_df(bracken_domain)
 plot_domain_abundance(domain_abundance_df, domain_abundance_html)
+plot_domain_blocks(domain_abundance_df, block_plot_html)
 
 filtering_results_df, read_quality_df = get_qc_filtering_dataframes(json_files)
 plot_filtering_results(filtering_results_df, filtering_html)
 
-save_summary_csv(domain_abundance_df, human_cont_df, read_quality_df, summary_out_csv)
+save_summary_csv(human_cont_df=human_cont_df, read_quality_df=read_quality_df, outfile=summary_out_csv, domain_abundance_df=domain_abundance_df)
