@@ -325,7 +325,8 @@ def save_summary_csv(domain_abundance_df, human_cont_df, read_quality_df, outfil
 
     df_all_for_csv = pd.concat([domain_abundance_for_csv, human_cont_for_csv], axis=1)
 
-    header = ["Human", "Bacteria", "Eukaryota", "Archaea", "Viruses"]
+    # header = ["Human", "Bacteria", "Eukaryota", "Archaea", "Viruses"]
+    header = ["Human", "Bacteria"]
     new_cols = [s + " (%)" for s in header]
     df_all_for_csv = df_all_for_csv[header]
     df_all_for_csv.columns = new_cols
@@ -344,7 +345,7 @@ plot_human_contamination(human_cont_df, contamination_html)
 
 domain_abundance_df = get_domain_abundance_df(bracken_domain)
 plot_domain_abundance(domain_abundance_df, domain_abundance_html)
-plot_domain_blocks(domain_abundance_df, block_plot_html)
+# plot_domain_blocks(domain_abundance_df, block_plot_html)
 
 filtering_results_df, read_quality_df = get_qc_filtering_dataframes(json_files)
 plot_filtering_results(filtering_results_df, filtering_html)

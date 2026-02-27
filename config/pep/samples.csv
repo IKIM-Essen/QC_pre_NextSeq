@@ -1,2 +1,2 @@
 sample_name,fq1,fq2
-sampleID,path/to/read1,path/to/read/2
+115,/groups/ds/resistance_cefiderocol/data/subsampled/115_R1.fastq.gz,/groups/ds/resistance_cefiderocol/data/subsampled/115_R2.fastq.gz
