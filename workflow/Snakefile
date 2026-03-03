@@ -4,6 +4,9 @@
 # in particular regarding the standardized folder structure mentioned there.
 
 
+containerized: "containerization/my_container.sif"
+
+
 configfile: "config/config.yaml"
 
 

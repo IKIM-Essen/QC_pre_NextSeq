@@ -19,11 +19,8 @@ From: condaforge/miniforge3:latest
     mkdir -p /conda-envs/8bcfa5040c3f3fccb9990896a1047a49
     mkdir -p /conda-envs/30ef2e4d2f0920ae8c6c5118c93ed400
     mkdir -p /conda-envs/2e0b9e54d7d4d87567c5ffb2cc26709c
-    
-    conda config --set channel_priority strict
 
     apt-get update && apt-get install -y g++ gcc
-    apt-get update && apt-get install -y rsync
 
     wget -q https://github.com/snakemake/snakemake-wrappers/raw/v3.3.3/bio/fastp/environment.yaml -O /conda-envs/51cfe917ef083f45a131d4bed3b30579/environment.yaml
     wget -q https://github.com/snakemake/snakemake-wrappers/raw/v3.3.3/bio/fastqc/environment.yaml -O /conda-envs/24b8923f8e4abe077ffe95b01bfc1652/environment.yaml
@@ -42,5 +39,3 @@ From: condaforge/miniforge3:latest
     conda env create --prefix /conda-envs/30ef2e4d2f0920ae8c6c5118c93ed400 --file /conda-envs/30ef2e4d2f0920ae8c6c5118c93ed400/environment.yaml
     conda env create --prefix /conda-envs/2e0b9e54d7d4d87567c5ffb2cc26709c --file /conda-envs/2e0b9e54d7d4d87567c5ffb2cc26709c/environment.yaml
     conda clean --all -y
-
-    

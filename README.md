@@ -87,6 +87,43 @@ Snakemake will automatically detect the main Snakefile in the workflow subfolder
 
 The usage of this workflow is described in the [Snakemake Workflow Catalog](https://snakemake.github.io/snakemake-workflow-catalog/?usage=<owner>%2F<repo>).
 
+
+# Use Workflow with container
+
+## Generate Container
+
+### Create Dockerfile
+  
+`snakemake containerize > containerization/Dockerfile`
+
+### Generate .def
+
+
+`python containerization/dockerfile_to_singularity.py containerization/Dockerfile --output containerization/my_container.def`
+
+### Generate .sif
+
+
+`apptainer build containerization/my_container.sif containerization/my_container.def`
+
+
+## Execute workflow with container
+
+### Bind container to workflow
+
+Make shure your `Snakefile` links to the container via:
+`containerized: "containerization/my_container.sif"`
+
+### Run workflow with container
+
+Activate env with snakemake 9
+
+`snakemake --cores all --software-deployment-method conda apptainer`
+
+## Further information
+
+https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#containerization-of-conda-based-workflows 
+
 ## Workflow Overview
 
 ```mermaid
