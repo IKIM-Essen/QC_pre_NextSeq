@@ -94,7 +94,7 @@ The usage of this workflow is described in the [Snakemake Workflow Catalog](http
 
 ### Create Dockerfile
   
-`snakemake containerize > containerization/Dockerfile`
+`snakemake --containerize > containerization/Dockerfile`
 
 ### Generate .def
 
@@ -118,7 +118,9 @@ Make shure your `Snakefile` links to the container via:
 
 Activate env with snakemake 9
 
-`snakemake --cores all --software-deployment-method conda apptainer`
+
+/groups/ds/databases_refGenomes/databases
+`snakemake --cores all --software-deployment-method conda apptainer --singularity-args "--bind /groups/ds/databases_refGenomes/databases"`
 
 ## Further information
 

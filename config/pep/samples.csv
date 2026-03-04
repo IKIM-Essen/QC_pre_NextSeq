@@ -1,2 +1,4 @@
 sample_name,fq1,fq2
 115,/groups/ds/resistance_cefiderocol/data/subsampled/115_R1.fastq.gz,/groups/ds/resistance_cefiderocol/data/subsampled/115_R2.fastq.gz
+139,/groups/ds/resistance_cefiderocol/data/subsampled/139_R1.fastq.gz,/groups/ds/resistance_cefiderocol/data/subsampled/139_R2.fastq.gz
+156,/groups/ds/resistance_cefiderocol/data/subsampled/156_R1.fastq.gz,/groups/ds/resistance_cefiderocol/data/subsampled/156_R2.fastq.gz
