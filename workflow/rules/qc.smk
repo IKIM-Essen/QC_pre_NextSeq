@@ -41,6 +41,8 @@ rule fastp:
     log:
         "logs/{date}/qc/fastp/{sample}.log",
     threads: 2
+    resources:
+        mem_mb=8000,
     wrapper:
         "v3.3.3/bio/fastp"
 
