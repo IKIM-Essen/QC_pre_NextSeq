@@ -64,14 +64,8 @@ def get_kraken_db_url():
     return config["kraken-db"]["download-path"]
 
 
-def get_kraken_db_file():
-    if config["kraken-db"]["use-local"]:
-        path = config["kraken-db"]["local-path"]
-    else:
-        path = get_kraken_db_url()
-    db_name = (Path(path).name).rsplit("_", 1)[0]
-    file = "{}{}/hash.k2d".format(get_resource_path(), db_name)
-    return file
+def get_kraken_db_path():
+    return config["kraken-db"]["local-path"]
 
 
 def get_kraken_db_tar():

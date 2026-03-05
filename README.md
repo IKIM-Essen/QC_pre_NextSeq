@@ -117,10 +117,10 @@ Make shure your `Snakefile` links to the container via:
 ### Run workflow with container
 
 Activate env with snakemake 9
-
-
-/groups/ds/databases_refGenomes/databases
 `snakemake --cores all --software-deployment-method conda apptainer --singularity-args "--bind /groups/ds/databases_refGenomes/databases"`
+
+Run via slurm
+`nice snakemake --cores all --software-deployment-method conda apptainer --singularity-args "--bind /groups/ds/databases_refGenomes/databases" --jobs 2 -n`
 
 ## Further information
 
