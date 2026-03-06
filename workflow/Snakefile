@@ -29,7 +29,7 @@ if config["testing"]:
     rule all:
         input:
             expand(
-                "results/{date}/report/bracken/merged.bracken_{level}.txt",
+                "results/{date}/report/kaiju/merged.kaiju_{level}.tsv",
                 date=DATE,
                 level=get_tax_levels(),
             ),
@@ -47,7 +47,7 @@ else:
                 date=DATE,
             ),
             expand(
-                "results/{date}/report/bracken/merged.bracken_{level}.txt",
+                "results/{date}/report/kaiju/merged.kaiju_{level}.tsv",
                 date=DATE,
                 level=get_tax_levels(),
             ),
