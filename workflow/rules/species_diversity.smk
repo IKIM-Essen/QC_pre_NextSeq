@@ -1,122 +1,109 @@
-if config["kraken-db"]["use-local"]:
+from pathlib import Path
 
-    rule copy_local_kraken_db:
+
+def get_kaiju_fmi_file():
+    if config["kaiju-db"]["use-local"]:
+        return config["kaiju-db"]["local-fmi"]
+    return config["kaiju-db"]["fmi"]
+
+
+def get_kaiju_nodes_file():
+    if config["kaiju-db"]["use-local"]:
+        return config["kaiju-db"]["local-nodes-dmp"]
+    return config["kaiju-db"]["nodes-dmp"]
+
+
+def get_kaiju_names_file():
+    if config["kaiju-db"]["use-local"]:
+        return config["kaiju-db"]["local-names-dmp"]
+    return config["kaiju-db"]["names-dmp"]
+
+
+if not config["kaiju-db"]["use-local"]:
+
+    rule download_kaiju_db:
         output:
-            hfile=get_kraken_db_file(),
+            fmi=config["kaiju-db"]["fmi"],
+            nodes=config["kaiju-db"]["nodes-dmp"],
+            names=config["kaiju-db"]["names-dmp"],
         params:
-            local=config["kraken-db"]["local-path"],
-            db_folder=lambda wildcards, output: Path(output.hfile).parent,
-            resource_folder=lambda wildcards, output: Path(output.hfile).parent.parent,
-            filename=get_kraken_db_tar(),
+            download=config["kaiju-db"]["download-path"],
+            db_folder=lambda wc, output: Path(output.fmi).parent,
         log:
-            "logs/kraken2_DB_local_copy.log",
+            "logs/kaiju_DB_download.log",
         group:
-            "krakenDB_depended"
+            "kaijuDB_depended"
         conda:
             "../envs/unix.yaml"
         shell:
-            "(mkdir -p {params.db_folder}/ && "
-            "cp {params.local} {params.resource_folder}/ && "
-            "tar fzxv {params.resource_folder}/{params.filename} -C {params.db_folder}/ && "
-            "rm {params.resource_folder}/{params.filename}) > {log} 2>&1"
-
-else:
-
-    rule download_kraken_db:
-        output:
-            hfile=get_kraken_db_file(),
-        params:
-            download=get_kraken_db_url(),
-            db_folder=lambda wildcards, output: Path(output.hfile).parent,
-        log:
-            "logs/kraken2_DB_download.log",
-        group:
-            "krakenDB_depended"
-        conda:
-            "../envs/unix.yaml"
-        shell:
-            "(mkdir -p {params.db_folder} && "
-            "wget -c {params.download} -O - | "
-            "tar -zxv -C {params.db_folder}) > {log} 2>&1"
+            "(mkdir -p '{params.db_folder}' && "
+            "wget -c '{params.download}' -O - | "
+            "tar -xzv -C '{params.db_folder}') > {log} 2>&1"
 
 
-rule kraken2:
+rule kaiju:
     input:
-        hfile=get_kraken_db_file(),
+        fmi=get_kaiju_fmi_file(),
+        nodes=get_kaiju_nodes_file(),
+        names=get_kaiju_names_file(),
         fastqs=get_trimmed_fastqs,
     output:
-        report=temp("results/{date}/diversity/kraken_reports/{sample}_report.tsv"),
-        outfile=temp("results/{date}/diversity/kraken_outfiles/{sample}_outfile.tsv"),
-    params:
-        db=lambda wildcards, input: Path(input.hfile).parent,
-    threads: 32
+        kout=temp("results/{date}/diversity/kaiju_outfiles/{sample}.out"),
+    threads: 12
     log:
-        "logs/{date}/kraken2_run/{sample}.log",
+        "logs/{date}/kaiju/run/{sample}.log",
     group:
-        "krakenDB_depended"
+        "kaijuDB_depended"
     conda:
-        "../envs/kraken_based.yaml"
+        "../envs/kaiju_based.yaml"
     shell:
-        "kraken2 --db {params.db} --threads {threads} --quick --paired "
-        "--output {output.outfile} --report {output.report} "
-        "--gzip-compressed {input.fastqs} > {log} 2>&1"
+        "kaiju -t {input.nodes} -f {input.fmi} "
+        "-i {input.fastqs[0]} -j {input.fastqs[1]} "
+        "-z {threads} -o {output.kout} > {log} 2>&1"
 
 
-rule bracken_genus:
+rule kaiju_genus:
     input:
-        hfile=get_kraken_db_file(),
-        kreport=get_kraken_report,
+        nodes=get_kaiju_nodes_file(),
+        names=get_kaiju_names_file(),
+        kout=rules.kaiju.output.kout,
     output:
-        breport=temp("results/{date}/report/bracken/reports_genus/{sample}.breport"),
-        bfile=temp("results/{date}/report/bracken/files_genus/{sample}.bracken"),
+        report=temp("results/{date}/report/kaiju/reports_genus/{sample}.tsv"),
     params:
-        db=lambda wildcards, input: Path(input.hfile).parent,
-        level="G",
+        rank="genus",
     log:
-        "logs/{date}/bracken/genus/{sample}.log",
-    resources:
-        mem_mb=100,
+        "logs/{date}/kaiju/genus/{sample}.log",
     threads: 2
     group:
-        "krakenDB_depended"
+        "kaijuDB_depended"
     conda:
-        "../envs/kraken_based.yaml"
+        "../envs/kaiju_based.yaml"
     shell:
-        "bracken -d {params.db} -i {input.kreport} -l {params.level} -o {output.bfile} -w {output.breport} > {log} 2>&1"
+        "kaiju2table -t {input.nodes} -n {input.names} "
+        "-r {params.rank} -o {output.report} {input.kout} > {log} 2>&1"
 
 
-use rule bracken_genus as bracken_domain with:
-    input:
-        hfile=get_kraken_db_file(),
-        kreport=get_kraken_report,
+use rule kaiju_genus as kaiju_domain with:
     output:
-        breport=temp("results/{date}/report/bracken/reports_domain/{sample}.breport"),
-        bfile=temp("results/{date}/report/bracken/files_domain/{sample}.bracken"),
+        report=temp("results/{date}/report/kaiju/reports_domain/{sample}.tsv"),
     params:
-        db=lambda wildcards, input: Path(input.hfile).parent,
-        level="D",
+        rank="superkingdom",
     log:
-        "logs/{date}/bracken/domain/{sample}.log",
-    group:
-        "krakenDB_depended"
+        "logs/{date}/kaiju/domain/{sample}.log",
 
 
-rule merge_bracken:
+rule merge_kaiju:
     input:
         expand(
-            "results/{{date}}/report/bracken/files_{{level}}/{sample}.bracken",
+            "results/{{date}}/report/kaiju/reports_{{level}}/{sample}.tsv",
             sample=get_samples(),
         ),
     output:
-        "results/{date}/report/bracken/merged.bracken_{level}.txt",
+        "results/{date}/report/kaiju/merged.kaiju_{level}.tsv",
     log:
-        "logs/{date}/bracken/merge_{level}.log",
-    resources:
-        mem_mb=100,
-    threads: 2
-    params:
-        threads=1,
+        "logs/{date}/kaiju/merge_{level}.log",
+    threads: 1
     conda:
-        "../envs/kraken_based.yaml"
+        "../envs/kaiju_based.yaml"
     shell:
-        "(python $CONDA_PREFIX/bin/combine_bracken_outputs.py --files {input} --output {output}) > {log} 2>&1"
+        "cat {input} > {output} 2> {log}"
