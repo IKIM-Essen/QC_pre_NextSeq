@@ -7,7 +7,9 @@ rule qc_diversity_summary:
         stats=expand(
             "results/{{date}}/contamination/{sample}_stats.txt", sample=get_samples()
         ),
-        bracken="results/{date}/report/bracken/merged.bracken_domain.txt",
+        kaiju=expand("results/{{date}}/report/kaiju/merged.kaiju_{level}.tsv",
+            level=get_tax_levels(),
+        ),
     output:
         summary_csv=ensure(
             "results/{date}/report/filtering_summary.csv", non_empty=True
