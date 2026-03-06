@@ -60,26 +60,12 @@ def get_human_ref():
     return local_ref
 
 
-def get_kraken_db_url():
-    return config["kraken-db"]["download-path"]
+def get_tax_levels():
+    return ["genus", "domain"]
 
 
-def get_kraken_db_file():
-    if config["kraken-db"]["use-local"]:
-        path = config["kraken-db"]["local-path"]
-    else:
-        path = get_kraken_db_url()
-    db_name = (Path(path).name).rsplit("_", 1)[0]
-    file = "{}{}/hash.k2d".format(get_resource_path(), db_name)
-    return file
-
-
-def get_kraken_db_tar():
-    return Path(config["kraken-db"]["local-path"]).name
-
-
-def get_kraken_report(wildcards):
-    return "results/{date}/diversity/kraken_reports/{sample}_report.tsv"
+def get_kaiju_db_tar():
+    return Path(config["kaiju-db"]["local-path"]).name
 
 
 def get_tax_levels():
