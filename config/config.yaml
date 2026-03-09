@@ -1,7 +1,7 @@
 pepfile: config/pep/config.yaml
 
 ## this will be used as name for the results folder and can be found in the report
-run-date: "23_12_18"
+run-date: "Automation_test"
 
 testing: False
 
@@ -34,7 +34,7 @@ human-ref:
 kraken-db:
   use-local: True
   # path to a locally stored kraken2 database
-  local-path: "/groups/ds/databases_refGenomes/databases/latest/kraken2/standard-8/k2_standard_08gb_20240904.tar.gz"
+  local-path: "/groups/ds/databases_refGenomes/databases/latest/kraken2/standard-8"
   # if use-local = False the kraken2 database will be downloaded:
   download-path: "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240904.tar.gz"
 
