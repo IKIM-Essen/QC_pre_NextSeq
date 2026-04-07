@@ -49,7 +49,7 @@ rule kaiju:
         fastqs=get_trimmed_fastqs,
     output:
         kout=temp("results/{date}/diversity/kaiju_outfiles/{sample}.out"),
-    threads: 12
+    threads: 8
     log:
         "logs/{date}/kaiju/run/{sample}.log",
     group:
@@ -71,6 +71,7 @@ rule kaiju_genus:
         report=temp("results/{date}/report/kaiju/reports_genus/{sample}.tsv"),
     params:
         rank="genus",
+        lineage="",
     log:
         "logs/{date}/kaiju/genus/{sample}.log",
     threads: 2
@@ -80,14 +81,16 @@ rule kaiju_genus:
         "../envs/kaiju_based.yaml"
     shell:
         "kaiju2table -t {input.nodes} -n {input.names} "
-        "-r {params.rank} -o {output.report} {input.kout} > {log} 2>&1"
+        "-r {params.rank} {params.lineage} "
+        "-o {output.report} {input.kout} > {log} 2>&1"
 
 
 use rule kaiju_genus as kaiju_domain with:
     output:
         report=temp("results/{date}/report/kaiju/reports_domain/{sample}.tsv"),
     params:
-        rank="superkingdom",
+        rank="phylum",
+        lineage="-l superkingdom,phylum",
     log:
         "logs/{date}/kaiju/domain/{sample}.log",
 
