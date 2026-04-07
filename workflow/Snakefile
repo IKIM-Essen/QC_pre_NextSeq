@@ -37,6 +37,7 @@ if config["testing"]:
             expand("results/{date}/report/plots/read_summary.html", date=DATE),
             expand("results/{date}/report/plots/human_contamination.html", date=DATE),
             expand("results/{date}/report/plots/domain_abundance.html", date=DATE),
+            expand("results/{date}/report/plots/genus_abundance.html", date=DATE),
 
 else:
 
