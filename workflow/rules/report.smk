@@ -26,6 +26,13 @@ rule qc_diversity_summary:
             "results/{date}/report/plots/domain_abundance.html",
             category="4. Domain level abundance plot",
         ),
+        genus_abd_html=report(                          
+            "results/{date}/report/plots/genus_abundance.html",
+            category="5. Genus level abundance plot",
+        ),
+        genus_top10_csv=ensure(
+        "results/{date}/report/kaiju/genus_top10.csv", non_empty=True  
+        ),
     log:
         "logs/{date}/summary_and_plots.log",
     threads: 4
@@ -63,6 +70,34 @@ rule summary2report:
         "cp {params.styles}* {output}/css/ > {log} 2>&1"
 
 
+rule genus_top10_report:
+    input:
+        "results/{date}/report/kaiju/genus_top10.csv",
+    output:
+        report(
+            directory("results/{date}/report/genus_top10/"),
+            htmlindex="index.html",
+            category="6. Genus top 10 table",
+        ),
+    params:
+        pin_until="sample",
+        styles="resources/report/tables/",
+        name="genus_top10",
+        header=" ",
+        pattern=config["tablular-config"],
+    log:
+        "logs/{date}/genus_top10_to_html.log",
+    conda:
+        "../envs/rbt.yaml"
+    shell:
+        "rbt csv-report {input} --pin-until {params.pin_until} {output} && "
+        "(sed -i '{params.pattern} {params.header}</a>' "
+        "{output}/indexes/index1.html && "
+        "sed -i 's/report.xlsx/{params.name}_report.xlsx/g' {output}/indexes/index1.html) && "
+        "mv {output}/report.xlsx {output}/{params.name}_report.xlsx && "
+        "cp {params.styles}* {output}/css/ > {log} 2>&1"
+
+
 if not config["testing"]:
 
     rule snakemake_report:
@@ -72,6 +107,8 @@ if not config["testing"]:
             rules.qc_diversity_summary.output.read_summary_html,
             rules.qc_diversity_summary.output.human_cont_html,
             rules.qc_diversity_summary.output.domain_abd_html,
+            rules.qc_diversity_summary.output.genus_abd_html,
+            rules.genus_top10_report.output,
         output:
             "results/{date}/report/{date}_report.zip",
         log:
