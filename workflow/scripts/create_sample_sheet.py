@@ -105,7 +105,6 @@ def write_sample_sheet(pairs, outfile):
 
             sheet.write(f"{sample},{r1},{r2}\n")
 
-
 maybe_rename_files(inpath, os.listdir(inpath))
 pairs, _ = discover_fastqs(inpath)
 write_sample_sheet(pairs, sample_csv)
