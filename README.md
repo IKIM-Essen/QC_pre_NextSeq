@@ -5,6 +5,9 @@
 
 A Snakemake workflow for quick quality control of Illumina MiSeq paired end data before sequencing on high throughput sequencing device (e.g. NextSeq).
 
+## Disclaimer!
+This branch was an attempt on changing the whole workflow using Sourmash. The Workflow turned out to be not efficient using sourmash.
+
 ## Usage
 
 ### Step 1: Install Snakemake
