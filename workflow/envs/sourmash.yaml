@@ -1,6 +1,7 @@
 channels:
   - conda-forge
+  - bioconda
 dependencies:
-  - sourmash>=4.9
-  - pandas
-  - altair
+  - sourmash=4.9
+  - pandas=2.2
+  - altair=5.4
