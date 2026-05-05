@@ -7,7 +7,9 @@ rule qc_diversity_summary:
         stats=expand(
             "results/{{date}}/contamination/{sample}_stats.txt", sample=get_samples()
         ),
-        bracken="results/{date}/report/bracken/merged.bracken_domain.txt",
+        sourmash=expand(
+            "results/{{date}}/report/sourmash/{sample}_gather.tsv", sample=get_samples()
+        ),
     output:
         summary_csv=ensure(
             "results/{date}/report/filtering_summary.csv", non_empty=True
@@ -23,6 +25,10 @@ rule qc_diversity_summary:
         domain_abd_html=report(
             "results/{date}/report/plots/domain_abundance.html",
             category="4. Domain level abundance plot",
+        ),
+        domain_blocks_html=report(                          
+            "results/{date}/report/plots/domain_blocks.html",
+            category="5. Domain block plot",
         ),
     log:
         "logs/{date}/summary_and_plots.log",
@@ -70,6 +76,7 @@ if not config["testing"]:
             rules.qc_diversity_summary.output.read_summary_html,
             rules.qc_diversity_summary.output.human_cont_html,
             rules.qc_diversity_summary.output.domain_abd_html,
+            rules.qc_diversity_summary.output.domain_blocks_html,
         output:
             "results/{date}/report/{date}_report.zip",
         log:
@@ -78,4 +85,4 @@ if not config["testing"]:
             "../envs/snakemake.yaml"
         shell:
             "snakemake --nolock --report {output} "
-            "> {log} 2>&1"
+            "--profile '' > {log} 2>&1"
