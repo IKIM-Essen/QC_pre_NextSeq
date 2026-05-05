@@ -1,9 +1,0 @@
-channels:
-  - conda-forge
-  - bioconda
-  - anaconda
-  - nodefaults
-dependencies:
-  - kraken2 = 2.1.3
-  - krakentools = 1.2
-  - bracken=2.9
