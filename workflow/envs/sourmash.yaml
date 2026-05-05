@@ -1,0 +1,6 @@
+channels:
+  - conda-forge
+dependencies:
+  - sourmash>=4.9
+  - pandas
+  - altair
