@@ -82,5 +82,11 @@ def get_kraken_report(wildcards):
     return "results/{date}/diversity/kraken_reports/{sample}_report.tsv"
 
 
+def get_valid_samples(date):
+    import glob, os
+    flag_dir = f"results/{date}/diversity/valid_samples/"
+    flags = glob.glob(f"{flag_dir}/*.flag")
+    return [os.path.basename(f).replace(".flag","") for f in flags]
+
 def get_tax_levels():
     return ["genus", "domain"]
