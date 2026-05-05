@@ -40,83 +40,120 @@ else:
             "tar -zxv -C {params.db_folder}) > {log} 2>&1"
 
 
-rule kraken2:
+#rule kraken2:
+#    input:
+ #       hfile=get_kraken_db_file(),
+  #      fastqs=get_trimmed_fastqs,
+   # output:
+    #    report=temp("results/{date}/diversity/kraken_reports/{sample}_report.tsv"),
+     #   outfile=temp("results/{date}/diversity/kraken_outfiles/{sample}_outfile.tsv"),
+    #params:
+     #   db=lambda wildcards, input: Path(input.hfile).parent,
+    #threads: 32
+#   #log:
+     #   "logs/{date}/kraken2_run/{sample}.log",
+    #group:
+     #   "krakenDB_depended"
+    #conda:
+     #   "../envs/kraken_based.yaml"
+    #shell:
+    #    "kraken2 --db {params.db} --threads {threads} --quick --paired "
+     #   "--output {output.outfile} --report {output.report} "
+      #  "--gzip-compressed {input.fastqs} > {log} 2>&1"
+
+
+# ======================================
+# 1. Sketch pro Sample
+# ======================================
+rule sourmash_sketch:
     input:
-        hfile=get_kraken_db_file(),
-        fastqs=get_trimmed_fastqs,
+        r1="results/{date}/qc/fastp/{sample}.1.fastq.gz",
+        r2="results/{date}/qc/fastp/{sample}.2.fastq.gz",
     output:
-        report=temp("results/{date}/diversity/kraken_reports/{sample}_report.tsv"),
-        outfile=temp("results/{date}/diversity/kraken_outfiles/{sample}_outfile.tsv"),
-    params:
-        db=lambda wildcards, input: Path(input.hfile).parent,
-    threads: 32
-    log:
-        "logs/{date}/kraken2_run/{sample}.log",
-    group:
-        "krakenDB_depended"
+        sig="results/{date}/report/sourmash/{sample}.sig"
     conda:
-        "../envs/kraken_based.yaml"
+        "../envs/sourmash.yaml"
     shell:
-        "kraken2 --db {params.db} --threads {threads} --quick --paired "
-        "--output {output.outfile} --report {output.report} "
-        "--gzip-compressed {input.fastqs} > {log} 2>&1"
+        """
+        # Erst beide sketchen
+        sourmash sketch dna \
+          -p k=31,scaled=1000 \
+          {input.r1} {input.r2} \
+          -o {output.sig}.temp
+        
+        # Dann mergen zu einer Signatur
+        sourmash sig merge \
+          {output.sig}.temp \
+          -o {output.sig} \
+          --name {wildcards.sample}
+        
+        rm {output.sig}.temp
+        """
 
 
-rule bracken_genus:
+
+rule sourmash_sketch_human_db:
     input:
-        hfile=get_kraken_db_file(),
-        kreport=get_kraken_report,
+        fasta="resources/GCA_000001405.29_GRCh38.p14_genomic.fna.gz",
     output:
-        breport=temp("results/{date}/report/bracken/reports_genus/{sample}.breport"),
-        bfile=temp("results/{date}/report/bracken/files_genus/{sample}.bracken"),
-    params:
-        db=lambda wildcards, input: Path(input.hfile).parent,
-        level="G",
-    log:
-        "logs/{date}/bracken/genus/{sample}.log",
-    resources:
-        mem_mb=100,
-    threads: 2
-    group:
-        "krakenDB_depended"
+        sig="resources/sourmash_db/human_genome.sig",
     conda:
-        "../envs/kraken_based.yaml"
+        "../envs/sourmash.yaml"
     shell:
-        "bracken -d {params.db} -i {input.kreport} -l {params.level} -o {output.bfile} -w {output.breport} > {log} 2>&1"
+        "sourmash sketch dna -p k=31,scaled=1000 {input.fasta} -o {output.sig}"
 
-
-use rule bracken_genus as bracken_domain with:
+# ======================================
+# 3. Gather pro Sample
+# ======================================
+rule sourmash_gather_sample:
     input:
-        hfile=get_kraken_db_file(),
-        kreport=get_kraken_report,
+        sig="results/{date}/report/sourmash/{sample}.sig",
+        dbs=[
+            "resources/sourmash_db/gtdb-reps-rs226-k31.dna.zip",
+            "resources/sourmash_db/ncbi-viruses-2025.01.dna.k=31.sig.zip",
+            "resources/sourmash_db/human_genome.sig"
+        ]
     output:
-        breport=temp("results/{date}/report/bracken/reports_domain/{sample}.breport"),
-        bfile=temp("results/{date}/report/bracken/files_domain/{sample}.bracken"),
-    params:
-        db=lambda wildcards, input: Path(input.hfile).parent,
-        level="D",
+        tsv="results/{date}/report/sourmash/{sample}_gather.tsv",
+        csv="results/{date}/report/sourmash/{sample}_gather.csv"
     log:
-        "logs/{date}/bracken/domain/{sample}.log",
-    group:
-        "krakenDB_depended"
-
-
-rule merge_bracken:
-    input:
-        expand(
-            "results/{{date}}/report/bracken/files_{{level}}/{sample}.bracken",
-            sample=get_samples(),
-        ),
-    output:
-        "results/{date}/report/bracken/merged.bracken_{level}.txt",
-    log:
-        "logs/{date}/bracken/merge_{level}.log",
-    resources:
-        mem_mb=100,
-    threads: 2
-    params:
-        threads=1,
+        "logs/{date}/sourmash/gather/{sample}.log"
     conda:
-        "../envs/kraken_based.yaml"
+        "../envs/sourmash.yaml"
     shell:
-        "(python $CONDA_PREFIX/bin/combine_bracken_outputs.py --files {input} --output {output}) > {log} 2>&1"
+        """
+        # WICHTIG: KEIN --rna flag mehr!
+        sourmash gather \
+            --ksize 31 \
+            --threshold-bp 0 \
+            {input.sig} \
+            {input.dbs} \
+            -o {output.csv} \
+            > {log} 2>&1 || true
+        
+        # Erstelle TSV auch wenn keine Matches
+        if [ -f {output.csv} ] && [ -s {output.csv} ]; then
+            sed 's/,/\t/g' {output.csv} > {output.tsv}
+        else
+            # Leere Dateien mit Header
+            echo -e "intersect_bp\tf_orig_query\tf_match\tf_unique_to_query\tf_unique_weighted\taverage_abund\tmedian_abund\tstd_abund\tname\tfilename\tmd5\tf_match_orig\tunique_intersect_bp\tgather_result_rank\tremaining_bp\tquery_filename\tquery_name\tquery_md5\tquery_bp\tksize\tmoltype\tscaled\tquery_n_hashes\tsum_weighted_found\ttotal_weighted_hashes" > {output.tsv}
+            echo "intersect_bp,f_orig_query,f_match,f_unique_to_query,f_unique_weighted,average_abund,median_abund,std_abund,name,filename,md5,f_match_orig,unique_intersect_bp,gather_result_rank,remaining_bp,query_filename,query_name,query_md5,query_bp,ksize,moltype,scaled,query_n_hashes,sum_weighted_found,total_weighted_hashes" > {output.csv}
+        fi
+        """
+
+
+rule sourmash_domain_qc:
+    input:
+        gather=expand(
+            "results/{{date}}/report/sourmash/{sample}_gather.tsv",
+            sample=get_samples()
+        )
+    output:
+        "results/{date}/report/sourmash/domain_qc.tsv"
+    log:
+        "logs/{date}/sourmash/domain_qc.log"
+    conda:
+        "../envs/sourmash.yaml"
+    script:
+        "../scripts/sourmash_domain_qc.py"
+
