@@ -14,7 +14,7 @@ sample-sheet:
   # e.g. from sampleID_S40_L001_R1_001.fastq.gz to sampleID_R1.fastq.gz
   rename-sample-files: False
   # path to the fastq files of the samples for the sample sheet
-  data-path: "/path/to/Miseq/runfolder/"
+  data-path: "/local/work/saaruky/QC_pre_NextSeq/data"
 
 data-handling:
   # path to store input fastq data within the workflow
