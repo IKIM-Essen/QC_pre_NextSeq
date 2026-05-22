@@ -58,7 +58,7 @@ rule kraken2:
     group:
         "krakenDB_depended"
     conda:
-        "../envs/kraken_based.yaml"
+        "../envs/kaiju_based.yaml"
     shell:
         "kraken2 --db {params.db} --threads {threads} --quick {params.flag} "
         "--output {output.outfile} --report {output.report} "
@@ -83,7 +83,7 @@ rule bracken_genus:
     group:
         "krakenDB_depended"
     conda:
-        "../envs/kraken_based.yaml"
+        "../envs/.yaml"
     shell:
         "bracken -d {params.db} -i {input.kreport} -l {params.level} -o {output.bfile} -w {output.breport} > {log} 2>&1"
 
@@ -120,6 +120,6 @@ rule merge_bracken:
     params:
         threads=1,
     conda:
-        "../envs/kraken_based.yaml"
+        "../envs/kaiju_based.yaml"
     shell:
         "(python $CONDA_PREFIX/bin/combine_bracken_outputs.py --files {input} --output {output}) > {log} 2>&1"
