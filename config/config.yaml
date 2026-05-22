@@ -14,9 +14,9 @@ sample-sheet:
   auto-creation: True
   # False or True : Should the sample fastqs be renamed?
   # e.g. from sampleID_S40_L001_R1_001.fastq.gz to sampleID_R1.fastq.gz
-  rename-sample-files: False
+  rename-sample-files: True
   # path to the fastq files of the samples for the sample sheet
-  data-path: "/groups/ds/metagenomes/231218_Miseq/"
+  data-path: "/projects/seqlab/NextSeq_new/251202_VH00410_26_AAHHJG2M5/Analysis/1/Data/fastq/"
 
 data-handling:
   # path to store input fastq data within the workflow
