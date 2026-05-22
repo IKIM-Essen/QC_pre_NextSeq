@@ -1,1 +1,3 @@
 sample_name,fq1,fq2,technology
+25_R1,/projects/seqlab/NextSeq_new/251202_VH00410_26_AAHHJG2M5/Analysis/1/Data/fastq/25_R1.fastq.gz,,ont
+25_R2,/projects/seqlab/NextSeq_new/251202_VH00410_26_AAHHJG2M5/Analysis/1/Data/fastq/25_R2.fastq.gz,,ont
