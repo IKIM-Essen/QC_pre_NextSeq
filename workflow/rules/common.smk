@@ -53,20 +53,23 @@ def get_trimmed_fastq(wildcards):
 
 def get_human_ref():
     if config["human-ref"]["use-local"]:
-        path = config["human-ref"]["local-path"]
+        local_ref = config["human-ref"]["local-path"]
     else:
         path = config["human-ref"]["download-path"]
-    local_ref = "{}{}".format(get_resource_path(), path.split("/")[-1])
+        local_ref = "{}{}".format(get_resource_path(), path.split("/")[-1])
     return local_ref
 
 
-def get_tax_levels():
-    return ["genus", "domain"]
+def get_kaiju_fmi_file():
+    return config["kaiju-db"]["fmi-file"]
 
 
-def get_kaiju_db_tar():
-    return Path(config["kaiju-db"]["local-path"]).name
+def get_kaiju_nodes_file():
+    return config["kaiju-db"]["nodes-dmp"]
 
+
+def get_kaiju_names_file():
+    return config["kaiju-db"]["names-dmp"]
 
 def get_tax_levels():
     return ["genus", "domain"]
