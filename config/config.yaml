@@ -27,22 +27,18 @@ data-handling:
 human-ref:
   use-local: True
   # path to a locally stored human reference genome
-  local-path: "/groups/ds/databases_refGenomes/refGenomes/latest/human/GCA_000001405.29_GRCh38.p14_genomic.fna.gz"
+  local-path: "/groups/ds/databases_refGenomes/refGenomes/latest/human/GRCh38_latest_genomic.fna.gz"
   # if use-local = False the reference genome is downloaded via the following link
   download-path: "https://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens/annotation/GRCh38_latest/refseq_identifiers/GRCh38_latest_genomic.fna.gz"
 
 kaiju-db:
-  use-local: True
-  # path to a locally stored kaiju database
-  local-fmi: "/groups/ds/databases_refGenomes/databases/latest/kaiju/refseq_nr/unpacked_2023-06-17/kaiju_db_refseq_nr.fmi"
-  local-nodes-dmp: "/groups/ds/databases_refGenomes/databases/latest/kaiju/refseq_nr/unpacked_2023-06-17/nodes.dmp"
-  local-names-dmp: "/groups/ds/databases_refGenomes/databases/latest/kaiju/refseq_nr/unpacked_2023-06-17/names.dmp"
-  # if use-local = False the kaiju database will be downloaded:
-  download-path: "https://kaiju-idx.s3.eu-central-1.amazonaws.com/2024/kaiju_db_refseq_nr_2024-08-13.tgz"
-  # expected files after unpacking
-  fmi: "resources/databases/kaiju/kaiju_db_refseq_nr.fmi"
-  nodes-dmp: "resources/databases/kaiju/nodes.dmp"
-  names-dmp: "resources/databases/kaiju/names.dmp"
+  use-shared: True
+  # if use-shared False: DB is downloaded and saved to these paths
+  fmi-file: "/groups/ds/databases_refGenomes/databases/latest/kaiju/refseq_nr/unpacked_2024-08-13/kaiju_db_refseq_nr.fmi"
+  nodes-dmp: "/groups/ds/databases_refGenomes/databases/latest/kaiju/refseq_nr/unpacked_2024-08-13/nodes.dmp"
+  names-dmp: "/groups/ds/databases_refGenomes/databases/latest/kaiju/refseq_nr/unpacked_2024-08-13/names.dmp"
+
+  download: "https://kaiju-idx.s3.eu-central-1.amazonaws.com/2024/kaiju_db_refseq_nr_2024-08-13.tgz"
 
 ## qualtiy criteria used for filtering
 quality-criteria:
