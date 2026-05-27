@@ -1,33 +1,15 @@
 from pathlib import Path
 
 
-def get_kaiju_fmi_file():
-    if config["kaiju-db"]["use-local"]:
-        return config["kaiju-db"]["local-fmi"]
-    return config["kaiju-db"]["fmi"]
-
-
-def get_kaiju_nodes_file():
-    if config["kaiju-db"]["use-local"]:
-        return config["kaiju-db"]["local-nodes-dmp"]
-    return config["kaiju-db"]["nodes-dmp"]
-
-
-def get_kaiju_names_file():
-    if config["kaiju-db"]["use-local"]:
-        return config["kaiju-db"]["local-names-dmp"]
-    return config["kaiju-db"]["names-dmp"]
-
-
-if not config["kaiju-db"]["use-local"]:
+if not config["kaiju-db"]["use-shared"]:
 
     rule download_kaiju_db:
         output:
-            fmi=config["kaiju-db"]["fmi"],
-            nodes=config["kaiju-db"]["nodes-dmp"],
-            names=config["kaiju-db"]["names-dmp"],
+            fmi=get_kaiju_fmi_file(),
+            nodes=get_kaiju_nodes_file(),
+            names=get_kaiju_names_file(),
         params:
-            download=config["kaiju-db"]["download-path"],
+            download=config["kaiju-db"]["download"],
             db_folder=lambda wc, output: Path(output.fmi).parent,
         log:
             "logs/kaiju_DB_download.log",
@@ -49,7 +31,7 @@ rule kaiju:
         fastqs=get_trimmed_fastqs,
     output:
         kout=temp("results/{date}/diversity/kaiju_outfiles/{sample}.out"),
-    threads: 8
+    threads: 16
     log:
         "logs/{date}/kaiju/run/{sample}.log",
     group:
