@@ -1,22 +1,4 @@
-if config["human-ref"]["use-local"]:
-
-    rule copy_local_human_ref:
-        output:
-            fasta=temp(get_human_ref()),
-        params:
-            local=config["human-ref"]["local-path"],
-            folder=lambda wildcards, output: Path(output.fasta).parent,  #get_resource_path(),
-        log:
-            "logs/human_ref_local_copy.log",
-        group:
-            "refGenome_depended"
-        conda:
-            "../envs/unix.yaml"
-        shell:
-            "(mkdir -p {params.folder} && "
-            "cp {params.local} {output.fasta}) > {log} 2>&1"
-
-else:
+if not config["human-ref"]["use-local"]:
 
     rule download_human_ref:
         output:
