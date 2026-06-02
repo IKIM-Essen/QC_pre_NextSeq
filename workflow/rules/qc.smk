@@ -1,28 +1,6 @@
-RAW_DATA_PATH = get_data_path()
-from pathlib import Path
-
-
-rule local_fastqs:
-    input:
-        fastqs=get_fastqs,
-    output:
-        raw1=temp(Path(RAW_DATA_PATH) / "{date}" / "{sample}_R1.fastq.gz"),
-        raw2=temp(Path(RAW_DATA_PATH) / "{date}" / "{sample}_R2.fastq.gz"),
-    params:
-        outdir=lambda wildcards, output: Path(output.raw1).parent,
-    log:
-        "logs/{date}/copy_data/{sample}.log",
-    conda:
-        "../envs/unix.yaml"
-    shell:
-        "(mkdir -p {params.outdir} && "
-        "cp -v {input.fastqs[0]} {output.raw1} && "
-        "cp -v {input.fastqs[1]} {output.raw2}) > {log} 2>&1"
-
-
 rule fastp:
     input:
-        sample=get_local_fastqs,
+        sample=get_fastqs,
     output:
         trimmed=temp(
             [
@@ -42,7 +20,7 @@ rule fastp:
         "logs/{date}/qc/fastp/{sample}.log",
     threads: 2
     wrapper:
-        "v3.3.3/bio/fastp"
+        "v9.8.0/bio/fastp"
 
 
 rule fastqc:
@@ -57,7 +35,7 @@ rule fastqc:
     resources:
         mem_mb=1024,
     wrapper:
-        "v3.3.3/bio/fastqc"
+        "v7.6.0/bio/fastqc"
 
 
 rule multiqc:
@@ -86,4 +64,4 @@ rule multiqc:
     log:
         "logs/{date}/qc/multiqc.log",
     wrapper:
-        "v3.3.3/bio/multiqc"
+        "v9.8.0/bio/multiqc"

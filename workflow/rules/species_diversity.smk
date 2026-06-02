@@ -31,7 +31,7 @@ rule kaiju:
         fastqs=get_trimmed_fastqs,
     output:
         kout=temp("results/{date}/diversity/kaiju_outfiles/{sample}.out"),
-    threads: 16
+    threads: 60
     log:
         "logs/{date}/kaiju/run/{sample}.log",
     group:

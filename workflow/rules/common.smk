@@ -4,12 +4,8 @@ import os
 configfile: "config/config.yaml"
 
 
-def get_data_path():
-    return config["data-handling"]["data"]
-
-
 def get_resource_path():
-    return config["data-handling"]["resources"]
+    return config["resources"]
 
 
 def get_run_date():
@@ -21,17 +17,11 @@ def get_samples():
 
 
 def get_fastqs(wildcards):
+    file_r1 = pep.sample_table.loc[wildcards.sample]["fq1"]
+    file_r2 = pep.sample_table.loc[wildcards.sample]["fq2"]
     return (
-        pep.sample_table.loc[wildcards.sample]["fq1"],
-        pep.sample_table.loc[wildcards.sample]["fq2"],
-    )
-
-
-def get_local_fastqs(wildcards):
-    path = get_data_path()
-    return (
-        "{data}{{date}}/{{sample}}_R1.fastq.gz".format(data=path),
-        "{data}{{date}}/{{sample}}_R2.fastq.gz".format(data=path),
+        file_r1,
+        file_r2,
     )
 
 
@@ -70,6 +60,7 @@ def get_kaiju_nodes_file():
 
 def get_kaiju_names_file():
     return config["kaiju-db"]["names-dmp"]
+
 
 def get_tax_levels():
     return ["genus", "domain"]

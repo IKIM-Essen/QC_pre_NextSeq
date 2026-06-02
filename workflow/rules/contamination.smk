@@ -5,7 +5,7 @@ if not config["human-ref"]["use-local"]:
             fasta=get_human_ref(),
         params:
             download=config["human-ref"]["download-path"],
-            folder=lambda wildcards, output: Path(output.fasta).parent,  #get_resource_path(),
+            folder=lambda wildcards, output: Path(output.fasta).parent,
         log:
             "logs/human_ref_download.log",
         group:
@@ -34,7 +34,7 @@ rule minimap2_bam_sorted:
         sort_extra="",
     threads: 12
     wrapper:
-        "v3.3.3/bio/minimap2/aligner"
+        "v9.4.2/bio/minimap2/aligner"
 
 
 rule host_stats:
@@ -48,4 +48,4 @@ rule host_stats:
     log:
         "logs/{date}/contamination/stats/{sample}.log",
     wrapper:
-        "v3.3.3/bio/samtools/stats"
+        "v9.4.2/bio/samtools/stats"

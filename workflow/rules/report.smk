@@ -11,9 +11,7 @@ rule qc_diversity_summary:
             level=get_tax_levels(),
         ),
     output:
-        summary_csv=ensure(
-            "results/{date}/report/filtering_summary.csv", non_empty=True
-        ),
+        summary_csv="results/{date}/report/filtering_summary.csv",
         human_cont_html=report(
             "results/{date}/report/plots/human_contamination.html",
             category="5. Human contamination plot",
@@ -30,9 +28,7 @@ rule qc_diversity_summary:
             "results/{date}/report/plots/genus_abundance.html",
             category="5. Genus level abundance plot",
         ),
-        genus_top10_csv=ensure(
-        "results/{date}/report/kaiju/genus_top10.csv", non_empty=True  
-        ),
+        genus_top10_csv="results/{date}/report/kaiju/genus_top10.csv",
     log:
         "logs/{date}/summary_and_plots.log",
     threads: 4
