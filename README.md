@@ -1,7 +1,7 @@
 # QC for NextSeq
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥9.0-brightgreen.svg)](https://snakemake.github.io)
-[![GitHub actions status](https://github.com/<IKIM-Essen>/<QC_pre_NextSeq>/workflows/Tests/badge.svg?branch=main)](https://github.com/<IKIM-Essen>/<QC_pre_NextSeq>/actions?query=branch%3Amain+workflow%3ATests)
+[![GitHub actions status](https://github.com/IKIM-Essen/QC_pre_NextSeq/workflows/Tests/badge.svg?branch=main)](https://github.com/IKIM-Essen/QC_pre_NextSeq/actions?query=branch%3Amain+workflow%3ATests)
 
 A Snakemake workflow for quick quality control of Illumina MiSeq paired end data before sequencing on high throughput sequencing device (e.g. NextSeq).
 
