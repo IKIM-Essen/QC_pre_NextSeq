@@ -4,6 +4,4 @@ channels:
   - anaconda
   - nodefaults
 dependencies:
-  - kraken2 = 2.14
-  - krakentools = 1.2.1
-  - bracken=3.1
+  - kaiju

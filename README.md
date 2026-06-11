@@ -1,7 +1,7 @@
 # QC for NextSeq
 
-[![Snakemake](https://img.shields.io/badge/snakemake-≥7.0-brightgreen.svg)](https://snakemake.github.io)
-[![GitHub actions status](https://github.com/<owner>/<repo>/workflows/Tests/badge.svg?branch=main)](https://github.com/<owner>/<repo>/actions?query=branch%3Amain+workflow%3ATests)
+[![Snakemake](https://img.shields.io/badge/snakemake-≥9.0-brightgreen.svg)](https://snakemake.github.io)
+[![GitHub actions status](https://github.com/IKIM-Essen/QC_pre_NextSeq/workflows/Tests/badge.svg?branch=main)](https://github.com/IKIM-Essen/QC_pre_NextSeq/actions?query=branch%3Amain+workflow%3ATests)
 
 A Snakemake workflow for quick quality control of Illumina MiSeq paired end data before sequencing on high throughput sequencing device (e.g. NextSeq).
 
@@ -107,8 +107,8 @@ flowchart TB;
       B["Trimming and Filtering <br> fastp"]
       C["Quality control <br> fastQC"]
       D[/MultiQC report/]
-      E["Taxonomy Assignment <br> Kraken 2"]
-      F["Abundance Analysis <br> Bracken"]
+      E["Taxonomy Classification <br> Kaiju"]
+      F["Kaiju summary/visualization <br> visualization"]
       G["Mapping against human genome <br> minimap2"]
       H[/Snakemake report/]
       

@@ -1,12 +1,9 @@
 pepfile: config/pep/config.yaml
 
 ## this will be used as name for the results folder and can be found in the report
-run-date: "23_12_18"
+run-date: "26_06_02"
 
 testing: False
-
-## adapter sequences used for trimming
-adapter-seqs: "-a GCGAATTTCGACGATCGTTGCATTAACTCGCGAA -g AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
 
 ## Option for the auto-creation of the sample sheet
 sample-sheet:
@@ -18,25 +15,21 @@ sample-sheet:
   # path to the fastq files of the samples for the sample sheet
   data-path: "/groups/ds/metagenomes/231218_Miseq/"
 
-data-handling:
-  # path to store input fastq data within the workflow
-  data: "data/"
-  # path to store databases and reference genomes used within the workflow
-  resources: "resources/"
-
 human-ref:
   use-local: True
   # path to a locally stored human reference genome
-  local-path: "/groups/ds/databases_refGenomes/refGenomes/latest/human/GCA_000001405.29_GRCh38.p14_genomic.fna.gz"
+  local-path: "/groups/ds/databases_refGenomes/refGenomes/latest/human/GRCh38_latest_genomic.fna.gz"
   # if use-local = False the reference genome is downloaded via the following link
   download-path: "https://ftp.ncbi.nlm.nih.gov/refseq/H_sapiens/annotation/GRCh38_latest/refseq_identifiers/GRCh38_latest_genomic.fna.gz"
 
-kraken-db:
-  use-local: True
-  # path to a locally stored kraken2 database
-  local-path: "/groups/ds/databases_refGenomes/databases/latest/kraken2/standard-8/k2_standard_08gb_20240904.tar.gz"
-  # if use-local = False the kraken2 database will be downloaded:
-  download-path: "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20240904.tar.gz"
+kaiju-db:
+  use-shared: True
+  # if use-shared False: DB is downloaded and saved to these paths
+  fmi-file: "/groups/ds/databases_refGenomes/databases/latest/kaiju/refseq_nr/unpacked_2024-08-13/kaiju_db_refseq_nr.fmi"
+  nodes-dmp: "/groups/ds/databases_refGenomes/databases/latest/kaiju/refseq_nr/unpacked_2024-08-13/nodes.dmp"
+  names-dmp: "/groups/ds/databases_refGenomes/databases/latest/kaiju/refseq_nr/unpacked_2024-08-13/names.dmp"
+
+  download: "https://kaiju-idx.s3.eu-central-1.amazonaws.com/2024/kaiju_db_refseq_nr_2024-08-13.tgz"
 
 ## qualtiy criteria used for filtering
 quality-criteria:
@@ -44,6 +37,12 @@ quality-criteria:
   min-length-reads: 15
   # average quality of acceptable reads (PHRED)
   min-PHRED: 20
+
+## adapter sequences used for trimming
+adapter-seqs: "-a GCGAATTTCGACGATCGTTGCATTAACTCGCGAA -g AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
+
+# path to store databases and reference genomes used within the workflow
+resources: "resources/"
 
 ## string term used for formatting output tables
 tablular-config: '/>github<\/a>/a \\t\t\t</li>\n\t\t\t<li class="nav-item"> \n\t\t\t\t<a class="nav-link" href="#">'

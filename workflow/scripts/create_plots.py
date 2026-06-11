@@ -10,40 +10,61 @@ sys.stderr = open(snakemake.log[0], "w")
 
 ## input files
 stat_files = snakemake.input.stats
-bracken_domain = snakemake.input.bracken
+kaiju_inputs = list(snakemake.input.kaiju)
 json_files = snakemake.input.jsons
 
-
 ## output files
-contamination_html = snakemake.output.human_cont_html  # "conta.html" #
-domain_abundance_html = snakemake.output.domain_abd_html  #'domain_abundance.html' #
-filtering_html = snakemake.output.read_summary_html  #'filtering_summary.html' #
-summary_out_csv = snakemake.output.summary_csv  # "summary.csv" #
+contamination_html = snakemake.output.human_cont_html
+domain_abundance_html = snakemake.output.domain_abd_html
+filtering_html = snakemake.output.read_summary_html
+summary_out_csv = snakemake.output.summary_csv
+genus_abundance_html = snakemake.output.genus_abd_html
+genus_top10_csv = snakemake.output.genus_top10_csv
 
 ## variables
 color_red = "#e03e3e"
 color_green = "#6aa84f"
 
+DOMAIN_ORDER = ["Bacteria", "Eukaryota", "Archaea", "Viruses", "Unclassified"]
+DOMAIN_COLORS = ["#4e79a7", "#f28e2b", "#e15759", "#59a14f", "#9d9d9d"]
 
-## functions
+GENUS_PALETTE = [
+    "#4e79a7", "#f28e2b", "#e15759", "#76b7b2", "#59a14f",
+    "#edc948", "#b07aa1", "#ff9da7", "#9c755f", "#bab0ac",
+]
+
+
+def _pick_input(inputs, patterns):
+    for p in inputs:
+        for pat in patterns:
+            if pat in p:
+                return p
+    return inputs[0] if inputs else None
+
+
 def get_human_contamination_df(stat_files):
+    def _first_int(s):
+        m = re.findall(r"\d+", s)
+        return int(m[0]) if m else 0
+
     sum_dict = {}
     for stats_path in stat_files:
-        # file=stats_path.split("/")[-1]
         sample = (re.search("(.*)_stats.txt", os.path.basename(stats_path))).group(1)
         sample_sum_dict = {}
         with open(stats_path, "r") as stats:
+            total = None
+            mapped = None
             for line in stats:
-                if line.startswith("SN	sequences"):
-                    total = line.split(":")[-1].strip()
-                    continue
-                elif line.startswith("SN	reads mapped"):
-                    mapped = line.split(":")[-1].strip()
-                    # sample_sum_dict["reads_mapped"] =int(mapped)
+                if re.match(r"^SN\s+sequences", line):
+                    total = _first_int(line.split(":", 1)[-1])
+                elif re.match(r"^SN\s+reads mapped", line):
+                    mapped = _first_int(line.split(":", 1)[-1])
 
-                    prc = int(mapped) / int(total)
-                    sample_sum_dict["Human"] = prc  # "%.6f" %
-                    break
+            if total and mapped is not None:
+                prc = mapped / total
+                sample_sum_dict["Human"] = prc
+            else:
+                sample_sum_dict["Human"] = 0.0
 
         sum_dict[sample] = sample_sum_dict
 
@@ -51,8 +72,6 @@ def get_human_contamination_df(stat_files):
     human_cont_df = human_cont_df.reset_index()
     human_cont_df.rename(columns={"index": "sample"}, inplace=True)
     human_cont_df.sort_values(by=["sample"], inplace=True)
-
-    # human_cont_df.to_csv(out_csv)
     return human_cont_df
 
 
@@ -60,12 +79,10 @@ def plot_human_contamination(human_cont_df, out_html):
     slider = alt.binding_range(
         min=0, max=100, step=0.5, name="max human contamination:"
     )
-    # selector = alt.param(name='SelectorName', value=50, bind=slider)
     selector = alt.selection_point(
         name="SelectorName", fields=["max_contamination"], bind=slider, value=50
     )
 
-    # ,title="% human contamination"
     base_chart = (
         alt.Chart(human_cont_df)
         .encode(
@@ -96,34 +113,64 @@ def plot_human_contamination(human_cont_df, out_html):
         text=alt.Text("Human:Q", format=".2%"),
     )
 
-    full_chart = bars + chart_text
-    full_chart.save(out_html)
+    (bars + chart_text).save(out_html)
 
 
 def get_domain_abundance_df(infile):
     df = pd.read_table(infile)
-    # only keep bracken fraction columns & species name
-    df = df[df.columns.drop(list(df.filter(regex="bracken_num$|^taxonomy")))]
 
-    df.columns = df.columns.str.replace(".bracken_frac", "", regex=False)
+    cols = {c.lower(): c for c in df.columns}
+    file_col = cols.get("file")
+    pct_col = cols.get("percent")
+    name_col = cols.get("taxon_name", cols.get("name"))
 
-    # transpose df, change index & column names to get format for plotting
-    df_trans = df.transpose()
-    df_trans.reset_index(inplace=True)
+    if file_col is None or pct_col is None or name_col is None:
+        raise ValueError(f"Missing required columns. Found: {list(df.columns)}")
 
-    df_trans["index"][0] = "sample"
-    df_trans.columns = df_trans.iloc[0]
-    df_trans.drop(df_trans.index[0], inplace=True)
+    # remove repeated header rows
+    df = df[df[file_col] != "file"]
 
-    df_trans.sort_values(by=["sample"], inplace=True)
+    df[pct_col] = pd.to_numeric(df[pct_col], errors="coerce")
+    df = df[df[pct_col].notna()]
 
-    return df_trans
+    df["sample"] = (
+        df[file_col].astype(str)
+        .str.replace(r"\.out$", "", regex=True)
+        .str.replace(r".*/", "", regex=True)
+    )
+    df["share"] = df[pct_col] / 100.0
+
+    # Domain from taxon_name like "Bacteria;Actinomycetota;"
+    df["Domain"] = df[name_col].astype(str).str.split(";").str[0].str.strip()
+
+    df["Domain"] = df["Domain"].replace(
+        {
+            "unclassified": "Unclassified",
+            "cannot be assigned to a (non-viral) phylum": "Unclassified",
+        }
+    )
+
+
+    out = (
+        df.groupby(["sample", "Domain"], as_index=False)["share"]
+        .sum()
+        .pivot(index="sample", columns="Domain", values="share")
+        .fillna(0)
+        .reset_index()
+    )
+    out.columns.name = None
+    return out
 
 
 def plot_domain_abundance(domain_abundance_df, out_html):
+    keep_cols = ["sample"] + [d for d in DOMAIN_ORDER if d in domain_abundance_df.columns]
+    domain_abundance_df = domain_abundance_df[keep_cols]
+
     melt_df = domain_abundance_df.melt(
         id_vars=["sample"], var_name="Domain", value_name="share"
     )
+
+    color_scale = alt.Scale(domain=DOMAIN_ORDER, range=DOMAIN_COLORS)
 
     bars = (
         alt.Chart(melt_df, title="Relative abundance of domains")
@@ -136,7 +183,7 @@ def plot_domain_abundance(domain_abundance_df, out_html):
             alt.Y("sum(share)", stack="normalize")
             .axis(format="%", labelFontSize=12, titleFontSize=15)
             .title("Relative abundance"),
-            color=alt.Color("Domain"),
+            color=alt.Color("Domain", scale=color_scale),
             tooltip="combined_tooltip:N",
         )
         .properties(width="container", height=600)
@@ -149,10 +196,106 @@ def plot_domain_abundance(domain_abundance_df, out_html):
     bars.save(out_html)
 
 
+def get_genus_top10_per_sample(infile):
+    df = pd.read_table(infile)
+
+    cols = {c.lower(): c for c in df.columns}
+    file_col = cols.get("file")
+    pct_col = cols.get("percent")
+    name_col = cols.get("taxon_name", cols.get("name"))
+
+    if file_col is None or pct_col is None or name_col is None:
+        raise ValueError(f"Missing required columns. Found: {list(df.columns)}")
+
+    df = df[df[file_col] != "file"]
+    df[pct_col] = pd.to_numeric(df[pct_col], errors="coerce")
+    df = df[df[pct_col].notna()]
+
+    df["sample"] = (
+        df[file_col].astype(str)
+        .str.replace(r"\.out$", "", regex=True)
+        .str.replace(r".*/", "", regex=True)
+    )
+    df["share"] = df[pct_col] / 100.0
+    df["Genus"] = df[name_col].astype(str).str.strip()
+
+    df["bucket"] = df["Genus"]
+    df.loc[df["Genus"].str.contains("unclassified", case=False, na=False), "bucket"] = "Unclassified"
+    df.loc[df["Genus"].str.contains("cannot be assigned", case=False, na=False), "bucket"] = "Unclassified"
+    df = df[df["Genus"] != "Viruses"]
+
+    classified = df[df["bucket"] != "Unclassified"].copy()
+    classified["rank"] = classified.groupby("sample")["share"].rank(method="first", ascending=False)
+
+    top10 = classified[classified["rank"] <= 10].copy()
+    top10_table = (
+        top10.sort_values(["sample", "share"], ascending=[True, False])
+        .assign(percent=lambda x: (x["share"] * 100).round(2))
+        [["sample", "Genus", "percent"]]
+    )
+
+    top10_keys = set(zip(top10["sample"], top10["Genus"]))
+
+    def assign_bucket(row):
+        if row["bucket"] == "Unclassified":
+            return "Unclassified"
+        if (row["sample"], row["Genus"]) in top10_keys:
+            return row["Genus"]
+        return "Rest"
+
+    df["plot_genus"] = df.apply(assign_bucket, axis=1)
+    plot_df = (
+        df.groupby(["sample", "plot_genus"], as_index=False)["share"]
+        .sum()
+    )
+
+    return plot_df, top10_table
+
+
+def plot_genus_composition(plot_df, out_html):
+    genus_order = sorted(
+        [g for g in plot_df["plot_genus"].unique() if g not in {"Rest", "Unclassified"}]
+    ) + ["Rest", "Unclassified"]
+
+    color_range = GENUS_PALETTE[: max(0, len(genus_order) - 2)] + ["#c7c7c7", "#7f7f7f"]
+
+    bars = (
+        alt.Chart(plot_df, title="Genus composition (Top 10 per sample)")
+        .mark_bar()
+        .encode(
+            alt.X("sample:N").axis(labelFontSize=12, titleFontSize=15).title("Sample"),
+            alt.Y("sum(share):Q", stack="normalize")
+            .axis(format="%", labelFontSize=12, titleFontSize=15)
+            .title("Relative abundance"),
+            color=alt.Color(
+                "plot_genus:N",
+                sort=genus_order,
+                scale=alt.Scale(domain=genus_order, range=color_range),
+            ),
+            tooltip=[
+                alt.Tooltip("sample:N"),
+                alt.Tooltip("plot_genus:N", title="Genus"),
+                alt.Tooltip("share:Q", format=".2%"),
+            ],
+        )
+        .properties(width="container", height=600)
+    )
+
+    bars.save(out_html)
+
+
+def write_top10_table(df_top10, out_csv):
+    df_out = df_top10.copy()
+    df_out = df_out.sort_values(["sample", "percent"], ascending=[True, False]).reset_index(drop=True)
+    df_out["rank"] = df_out.groupby("sample").cumcount() + 1
+    df_out = df_out[["sample", "rank", "Genus", "percent"]]
+    df_out.columns = ["sample", "rank", "genus", "percent"]
+    df_out["percent"] = df_out["percent"].round(3)
+    df_out.to_csv(out_csv, index=False)
+
+
 def get_qc_filtering_dataframes(json_files):
-    ## contains number of reads before and after filtering & number of bases
     filtering_results_dict = {}
-    ## contains number of reads after filtering & rate of Q30 bases
     read_quality_dict = {}
 
     for jsonfile in json_files:
@@ -166,7 +309,6 @@ def get_qc_filtering_dataframes(json_files):
 
         total_reads = fastp["summary"]["after_filtering"]["total_reads"]
 
-        # save number of bases as Mbp
         bases = fastp["summary"]["after_filtering"]["total_bases"]
         sample_filt_results_dict["total_bases"] = "{} Mbp".format(
             round((bases / 1000000))
@@ -243,8 +385,7 @@ def plot_filtering_results(filt_results_df, out_html):
         color=alt.value("black"),
     )
 
-    full_chart = bars + chart_text
-    full_chart.save(out_html)
+    (bars + chart_text).save(out_html)
 
 
 def save_summary_csv(domain_abundance_df, human_cont_df, read_quality_df, outfile):
@@ -254,17 +395,54 @@ def save_summary_csv(domain_abundance_df, human_cont_df, read_quality_df, outfil
     human_cont_for_csv = human_cont_df.copy()
     human_cont_for_csv.set_index("sample", inplace=True)
 
-    df_all_for_csv = pd.concat([domain_abundance_for_csv, human_cont_for_csv], axis=1)
+    df_all_for_csv = pd.concat(
+        [read_quality_df, domain_abundance_for_csv, human_cont_for_csv], axis=1
+    )
 
-    header = ["Human", "Bacteria", "Eukaryota", "Archaea", "Viruses"]
-    new_cols = [s + " (%)" for s in header]
-    df_all_for_csv = df_all_for_csv[header]
-    df_all_for_csv.columns = new_cols
+    ordered_cols = [
+        "Total reads",
+        "Q30 bp (%)",
+        "Human",
+        "Bacteria",
+        "Eukaryota",
+        "Archaea",
+        "Viruses",
+        "Unclassified",
+    ]
+    df_all_for_csv = df_all_for_csv.reindex(columns=ordered_cols, fill_value=0)
 
-    df_all_for_csv = df_all_for_csv.mul(100)
-    df_all_for_csv = df_all_for_csv.astype("float64").round(3)
+    df_all_for_csv["Total reads"] = (
+        pd.to_numeric(df_all_for_csv["Total reads"], errors="coerce")
+        .fillna(0)
+        .map(lambda x: f"{int(x):,}")
+    )
 
-    df_all_for_csv = pd.concat([read_quality_df, df_all_for_csv], axis=1)
+    df_all_for_csv["Q30 bp (%)"] = (
+        pd.to_numeric(df_all_for_csv["Q30 bp (%)"], errors="coerce")
+        .fillna(0)
+        .map(lambda x: f"{x:.2f}")
+    )
+
+    percent_cols = ["Human", "Bacteria", "Eukaryota", "Archaea", "Viruses", "Unclassified"]
+    for col in percent_cols:
+        df_all_for_csv[col] = (
+            pd.to_numeric(df_all_for_csv[col], errors="coerce")
+            .fillna(0)
+            .mul(100)
+            .map(lambda x: f"{x:.2f}")
+        )
+
+    df_all_for_csv.rename(
+        columns={
+            "Human": "Human (%)",
+            "Bacteria": "Bacteria (%)",
+            "Eukaryota": "Eukaryota (%)",
+            "Archaea": "Archaea (%)",
+            "Viruses": "Viruses (%)",
+            "Unclassified": "Unclassified (%)",
+        },
+        inplace=True,
+    )
 
     df_all_for_csv.to_csv(outfile)
 
@@ -273,8 +451,19 @@ def save_summary_csv(domain_abundance_df, human_cont_df, read_quality_df, outfil
 human_cont_df = get_human_contamination_df(stat_files)
 plot_human_contamination(human_cont_df, contamination_html)
 
-domain_abundance_df = get_domain_abundance_df(bracken_domain)
+kaiju_domain_file = _pick_input(kaiju_inputs, ["merged.kaiju_domain", "merged.kaiju_phylum"])
+domain_abundance_df = get_domain_abundance_df(kaiju_domain_file)
 plot_domain_abundance(domain_abundance_df, domain_abundance_html)
+
+if genus_abundance_html:
+    kaiju_genus_file = _pick_input(kaiju_inputs, ["merged.kaiju_genus"])
+    if kaiju_genus_file:
+        genus_plot_df, genus_top10_df = get_genus_top10_per_sample(kaiju_genus_file)
+        plot_genus_composition(genus_plot_df, genus_abundance_html)
+        write_top10_table(genus_top10_df, genus_top10_csv)
+    else:
+        raise ValueError("genus_abundance_html requested but no merged.kaiju_genus input found")
+
 
 filtering_results_df, read_quality_df = get_qc_filtering_dataframes(json_files)
 plot_filtering_results(filtering_results_df, filtering_html)

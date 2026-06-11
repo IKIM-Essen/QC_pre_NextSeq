@@ -4,12 +4,8 @@ import os
 configfile: "config/config.yaml"
 
 
-def get_data_path():
-    return config["data-handling"]["data"]
-
-
 def get_resource_path():
-    return config["data-handling"]["resources"]
+    return config["resources"]
 
 
 def get_run_date():
@@ -21,17 +17,11 @@ def get_samples():
 
 
 def get_fastqs(wildcards):
+    file_r1 = pep.sample_table.loc[wildcards.sample]["fq1"]
+    file_r2 = pep.sample_table.loc[wildcards.sample]["fq2"]
     return (
-        pep.sample_table.loc[wildcards.sample]["fq1"],
-        pep.sample_table.loc[wildcards.sample]["fq2"],
-    )
-
-
-def get_local_fastqs(wildcards):
-    path = get_data_path()
-    return (
-        "{data}{{date}}/{{sample}}_R1.fastq.gz".format(data=path),
-        "{data}{{date}}/{{sample}}_R2.fastq.gz".format(data=path),
+        file_r1,
+        file_r2,
     )
 
 
@@ -53,33 +43,23 @@ def get_trimmed_fastq(wildcards):
 
 def get_human_ref():
     if config["human-ref"]["use-local"]:
-        path = config["human-ref"]["local-path"]
+        local_ref = config["human-ref"]["local-path"]
     else:
         path = config["human-ref"]["download-path"]
-    local_ref = "{}{}".format(get_resource_path(), path.split("/")[-1])
+        local_ref = "{}{}".format(get_resource_path(), path.split("/")[-1])
     return local_ref
 
 
-def get_kraken_db_url():
-    return config["kraken-db"]["download-path"]
+def get_kaiju_fmi_file():
+    return config["kaiju-db"]["fmi-file"]
 
 
-def get_kraken_db_file():
-    if config["kraken-db"]["use-local"]:
-        path = config["kraken-db"]["local-path"]
-    else:
-        path = get_kraken_db_url()
-    db_name = (Path(path).name).rsplit("_", 1)[0]
-    file = "{}{}/hash.k2d".format(get_resource_path(), db_name)
-    return file
+def get_kaiju_nodes_file():
+    return config["kaiju-db"]["nodes-dmp"]
 
 
-def get_kraken_db_tar():
-    return Path(config["kraken-db"]["local-path"]).name
-
-
-def get_kraken_report(wildcards):
-    return "results/{date}/diversity/kraken_reports/{sample}_report.tsv"
+def get_kaiju_names_file():
+    return config["kaiju-db"]["names-dmp"]
 
 
 def get_tax_levels():
