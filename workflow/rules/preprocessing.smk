@@ -9,6 +9,6 @@ rule create_sample_sheet:
     log:
         "logs/create_sample_sheet.log",
     conda:
-        "../envs/python.yaml",
+        "../envs/python.yaml"
     script:
         "../scripts/create_sample_sheet.py"
