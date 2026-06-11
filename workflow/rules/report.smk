@@ -5,9 +5,11 @@ rule qc_diversity_summary:
             sample=get_samples(),
         ),
         stats=expand(
-            "results/{{date}}/contamination/{sample}_stats.txt", sample=get_samples()
+            "results/{{date}}/contamination/{sample}_stats.txt",
+            sample=get_samples()
         ),
-        kaiju=expand("results/{{date}}/report/kaiju/merged.kaiju_{level}.tsv",
+        kaiju=expand(
+            "results/{{date}}/report/kaiju/merged.kaiju_{level}.tsv",
             level=get_tax_levels(),
         ),
     output:
