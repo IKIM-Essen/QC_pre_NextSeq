@@ -26,7 +26,7 @@ rule qc_diversity_summary:
             "results/{date}/report/plots/domain_abundance.html",
             category="4. Domain level abundance plot",
         ),
-        genus_abd_html=report(                          
+        genus_abd_html=report(
             "results/{date}/report/plots/genus_abundance.html",
             category="5. Genus level abundance plot",
         ),
