@@ -63,4 +63,9 @@ def get_kaiju_names_file():
 
 
 def get_tax_levels():
+    # In QC mode kaiju is skipped entirely, so no taxonomic levels are
+    # requested -> every expand(..., level=get_tax_levels()) becomes empty and
+    # the kaiju targets drop out of `rule all`. In diversity mode kaiju runs.
+    if config.get("mode", "qc") == "qc":
+        return []
     return ["genus", "domain"]

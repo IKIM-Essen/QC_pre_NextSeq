@@ -1,14 +1,19 @@
 pepfile: config/pep/config.yaml
 
 ## this will be used as name for the results folder and can be found in the report
-run-date: "26_06_02"
+run-date: "WW-16S-26-03__20260625_SL00554_0003_ASC2192826-SC3__1__FW"
+
+## Pipeline mode: "qc" (fastp/fastqc/multiqc/human-contamination, NO kaiju)
+## or "diversity" (kaiju taxonomic profiling on already-preprocessed reads).
+## Default is qc. run_qc.sh sets this per invocation.
+mode: "qc"
 
 testing: False
 
 ## Option for the auto-creation of the sample sheet
 sample-sheet:
   # False or True : Should the sample sheet be auto-created?
-  auto-creation: True
+  auto-creation: False
   # False or True : Should the sample fastqs be renamed?
   # e.g. from sampleID_S40_L001_R1_001.fastq.gz to sampleID_R1.fastq.gz
   rename-sample-files: False

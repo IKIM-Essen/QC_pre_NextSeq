@@ -451,18 +451,38 @@ def save_summary_csv(domain_abundance_df, human_cont_df, read_quality_df, outfil
 human_cont_df = get_human_contamination_df(stat_files)
 plot_human_contamination(human_cont_df, contamination_html)
 
-kaiju_domain_file = _pick_input(kaiju_inputs, ["merged.kaiju_domain", "merged.kaiju_phylum"])
-domain_abundance_df = get_domain_abundance_df(kaiju_domain_file)
-plot_domain_abundance(domain_abundance_df, domain_abundance_html)
-
-if genus_abundance_html:
-    kaiju_genus_file = _pick_input(kaiju_inputs, ["merged.kaiju_genus"])
-    if kaiju_genus_file:
-        genus_plot_df, genus_top10_df = get_genus_top10_per_sample(kaiju_genus_file)
-        plot_genus_composition(genus_plot_df, genus_abundance_html)
-        write_top10_table(genus_top10_df, genus_top10_csv)
-    else:
-        raise ValueError("genus_abundance_html requested but no merged.kaiju_genus input found")
+# kaiju is optional. In QC mode there are no kaiju inputs, but the Snakemake
+# rules still declare the domain/genus/top10 outputs, so we MUST create those
+# files (empty placeholders) to satisfy the DAG. domain_abundance_df stays empty
+# so the summary CSV simply has no domain columns.
+if kaiju_inputs:
+    kaiju_domain_file = _pick_input(kaiju_inputs, ["merged.kaiju_domain", "merged.kaiju_phylum"])
+    domain_abundance_df = get_domain_abundance_df(kaiju_domain_file)
+    plot_domain_abundance(domain_abundance_df, domain_abundance_html)
+    if genus_abundance_html:
+        kaiju_genus_file = _pick_input(kaiju_inputs, ["merged.kaiju_genus"])
+        if kaiju_genus_file:
+            genus_plot_df, genus_top10_df = get_genus_top10_per_sample(kaiju_genus_file)
+            plot_genus_composition(genus_plot_df, genus_abundance_html)
+            write_top10_table(genus_top10_df, genus_top10_csv)
+        else:
+            raise ValueError("genus_abundance_html requested but no merged.kaiju_genus input found")
+else:
+    # QC mode: write empty placeholders so all declared outputs exist.
+    domain_abundance_df = pd.DataFrame(columns=["sample"])
+    _placeholder = ("<html><body><p>kaiju taxonomic profiling was not run in "
+                    "QC mode. Run the pipeline with mode=diversity for domain/"
+                    "genus abundance.</p></body></html>")
+    if domain_abundance_html:
+        with open(domain_abundance_html, "w") as fh:
+            fh.write(_placeholder)
+    if genus_abundance_html:
+        with open(genus_abundance_html, "w") as fh:
+            fh.write(_placeholder)
+    if genus_top10_csv:
+        # minimal valid CSV so genus_top10_report (rbt csv-report) doesn't choke
+        with open(genus_top10_csv, "w") as fh:
+            fh.write("sample,rank,genus,percent\n")
 
 
 filtering_results_df, read_quality_df = get_qc_filtering_dataframes(json_files)

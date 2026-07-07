@@ -24,6 +24,12 @@
 !.snakemake-workflow-catalog.yml
 !LICENSE
 !README.md
+!containerization
+!containerization/*
+!containerization/Dockerfile
+!containerization/dockerfile_to_singularity.py
+!containerization/my_container.def
+containerization/qc_container.sif
 workflow/scripts/test_cont_plot.ipynb
 workflow/scripts/old_*
 resources/GCA_000001405.29_GRCh38.p14_genomic.fna.gz
