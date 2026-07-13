@@ -13,6 +13,9 @@ rule qc_diversity_summary:
         ),
     output:
         summary_csv="results/{date}/report/filtering_summary.csv",
+        # machine-readable per-sample metrics for the sample registry (raw
+        # numbers); ingested by dispatcher.py --reconcile into qc_metrics.
+        qc_metrics_tsv="results/{date}/report/qc_metrics.tsv",
         human_cont_html=report(
             "results/{date}/report/plots/human_contamination.html",
             category="5. Human contamination plot",
@@ -103,9 +106,19 @@ if not config["testing"]:
             "results/{date}/report/qc/multiqc.html",
             rules.qc_diversity_summary.output.read_summary_html,
             rules.qc_diversity_summary.output.human_cont_html,
-            rules.qc_diversity_summary.output.domain_abd_html,
-            rules.qc_diversity_summary.output.genus_abd_html,
-            rules.genus_top10_report.output,
+            # kaiju-based sections only exist meaningfully in diversity mode;
+            # in QC mode create_plots writes placeholders to satisfy the DAG,
+            # but we must NOT bundle them into the report (they were the "fake"
+            # empty domain/genus/top10 chapters). Include them only for diversity.
+            *(
+                [
+                    rules.qc_diversity_summary.output.domain_abd_html,
+                    rules.qc_diversity_summary.output.genus_abd_html,
+                    rules.genus_top10_report.output,
+                ]
+                if config.get("mode", "qc") == "diversity"
+                else []
+            ),
         output:
             "results/{date}/report/{date}_report.zip",
         log:

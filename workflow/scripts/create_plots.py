@@ -20,6 +20,10 @@ filtering_html = snakemake.output.read_summary_html
 summary_out_csv = snakemake.output.summary_csv
 genus_abundance_html = snakemake.output.genus_abd_html
 genus_top10_csv = snakemake.output.genus_top10_csv
+# Machine-readable per-sample QC metrics for the sample registry (raw numbers,
+# NOT display-formatted like filtering_summary.csv). Columns:
+#   sample  raw_read_pairs  trimmed_read_pairs  q30_pct  human_pct
+qc_metrics_tsv = snakemake.output.qc_metrics_tsv
 
 ## variables
 color_red = "#e03e3e"
@@ -55,9 +59,12 @@ def get_human_contamination_df(stat_files):
             total = None
             mapped = None
             for line in stats:
-                if re.match(r"^SN\s+sequences", line):
+                if re.match(r"^SN\s+sequences:", line):
                     total = _first_int(line.split(":", 1)[-1])
-                elif re.match(r"^SN\s+reads mapped", line):
+                elif re.match(r"^SN\s+reads mapped:", line):
+                    # anchor on the colon so this does NOT also match
+                    # "SN  reads mapped and paired:" (a later line that would
+                    # otherwise overwrite `mapped` with the wrong count)
                     mapped = _first_int(line.split(":", 1)[-1])
 
             if total and mapped is not None:
@@ -489,3 +496,45 @@ filtering_results_df, read_quality_df = get_qc_filtering_dataframes(json_files)
 plot_filtering_results(filtering_results_df, filtering_html)
 
 save_summary_csv(domain_abundance_df, human_cont_df, read_quality_df, summary_out_csv)
+
+
+def save_qc_metrics_tsv(filt_df, read_quality_df, human_cont_df, outfile):
+    """Machine-readable per-sample QC metrics for the sample registry: RAW
+    numbers (no thousands separators, no % strings), one row per sample.
+    fastp counts reads (R1+R2); the registry tracks PAIRS, so before/after
+    filtering counts are halved. Human contamination is mapped/total (a
+    fraction) turned into a percent. Missing values are left blank."""
+    import csv as _csv
+
+    filt = filt_df.set_index("sample")
+    human = human_cont_df.set_index("sample")
+    rq = read_quality_df  # index is already 'sample'
+
+    def _pairs(reads):
+        try:
+            return int(round(float(reads) / 2.0))
+        except (TypeError, ValueError):
+            return ""
+
+    def _num(v, ndigits=None):
+        try:
+            f = float(v)
+            return round(f, ndigits) if ndigits is not None else f
+        except (TypeError, ValueError):
+            return ""
+
+    samples = sorted(set(filt.index) | set(rq.index) | set(human.index))
+    with open(outfile, "w", newline="") as fh:
+        w = _csv.writer(fh, delimiter="\t")
+        w.writerow(["sample", "raw_read_pairs", "trimmed_read_pairs",
+                    "q30_pct", "human_pct"])
+        for s in samples:
+            raw = _pairs(filt.at[s, "before filtering"]) if s in filt.index else ""
+            trimmed = _pairs(filt.at[s, "after filtering"]) if s in filt.index else ""
+            q30 = _num(rq.at[s, "Q30 bp (%)"], 3) if s in rq.index else ""
+            hum = _num(human.at[s, "Human"]) if s in human.index else ""
+            hum = round(hum * 100, 4) if hum != "" else ""
+            w.writerow([s, raw, trimmed, q30, hum])
+
+
+save_qc_metrics_tsv(filtering_results_df, read_quality_df, human_cont_df, qc_metrics_tsv)
