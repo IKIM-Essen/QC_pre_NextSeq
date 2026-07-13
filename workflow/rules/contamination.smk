@@ -29,7 +29,7 @@ rule minimap2_bam_sorted:
     group:
         "refGenome_depended"
     params:
-        extra="-x map-sr",
+        extra="-x sr",
         sorting="coordinate",
         sort_extra="",
     threads: 12
