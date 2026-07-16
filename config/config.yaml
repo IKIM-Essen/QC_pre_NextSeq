@@ -20,6 +20,14 @@ sample-sheet:
   # path to the fastq files of the samples for the sample sheet
   data-path: "/groups/ds/metagenomes/231218_Miseq/"
 
+## Preprocessed reads handed back to the type pipelines (isolate/metagenome/16S)
+## so they can skip their own fastp/host-filtering. When True the deposited reads
+## are fastp-trimmed AND human-removed (mirrors ResMAG's host_filtering); when
+## False they are trimmed only. Either way %human is still MEASURED for
+## qc_metrics — this flag only controls whether human reads are REMOVED from the
+## reads we persist. Toggle off if a sample type should keep its human reads.
+remove-human: True
+
 human-ref:
   use-local: True
   # path to a locally stored human reference genome
@@ -38,13 +46,17 @@ kaiju-db:
 
 ## qualtiy criteria used for filtering
 quality-criteria:
-  # minimal length of acceptable reads
-  min-length-reads: 15
+  # minimal length of acceptable reads (aligned with the isolate/metagenome
+  # type pipelines so the preprocessed reads are reusable by them)
+  min-length-reads: 30
   # average quality of acceptable reads (PHRED)
   min-PHRED: 20
 
-## adapter sequences used for trimming
-adapter-seqs: "-a GCGAATTTCGACGATCGTTGCATTAACTCGCGAA -g AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
+## adapter sequences used for trimming. Nextera transposase adapters — matching
+## the isolate (phyloTree) and metagenome (ResMAG) pipelines so the trimmed
+## reads are interchangeable. fastp only trims where the adapter is actually
+## found, so this is safe for 16S amplicon reads too (no forced clipping).
+adapter-seqs: "-a CTGTCTCTTATACACATCT -g AGATGTGTATAAGAGACAG"
 
 # path to store databases and reference genomes used within the workflow
 resources: "resources/"
