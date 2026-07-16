@@ -12,6 +12,8 @@ sys.stderr = open(snakemake.log[0], "w")
 stat_files = snakemake.input.stats
 kaiju_inputs = list(snakemake.input.kaiju)
 json_files = snakemake.input.jsons
+# per-sample count of read pairs surviving human removal (both mates unmapped)
+nonhuman_files = snakemake.input.nonhuman
 
 ## output files
 contamination_html = snakemake.output.human_cont_html
@@ -22,7 +24,8 @@ genus_abundance_html = snakemake.output.genus_abd_html
 genus_top10_csv = snakemake.output.genus_top10_csv
 # Machine-readable per-sample QC metrics for the sample registry (raw numbers,
 # NOT display-formatted like filtering_summary.csv). Columns:
-#   sample  raw_read_pairs  trimmed_read_pairs  q30_pct  human_pct
+#   sample  raw_read_pairs  trimmed_read_pairs  host_removed_read_pairs
+#   q30_pct  human_pct
 qc_metrics_tsv = snakemake.output.qc_metrics_tsv
 
 ## variables
@@ -498,12 +501,29 @@ plot_filtering_results(filtering_results_df, filtering_html)
 save_summary_csv(domain_abundance_df, human_cont_df, read_quality_df, summary_out_csv)
 
 
-def save_qc_metrics_tsv(filt_df, read_quality_df, human_cont_df, outfile):
+def get_nonhuman_pairs(files):
+    """Map sample -> read pairs surviving human removal, read from the per-sample
+    `<sample>_nonhuman_pairs.txt` files (each a single integer: the count of
+    both-mates-unmapped R1 records == retained pairs)."""
+    out = {}
+    for path in files:
+        sample = re.search(r"(.*)_nonhuman_pairs.txt", os.path.basename(path)).group(1)
+        try:
+            with open(path) as fh:
+                out[sample] = int(fh.read().strip())
+        except (OSError, ValueError):
+            out[sample] = None
+    return out
+
+
+def save_qc_metrics_tsv(filt_df, read_quality_df, human_cont_df, nonhuman_pairs,
+                        outfile):
     """Machine-readable per-sample QC metrics for the sample registry: RAW
     numbers (no thousands separators, no % strings), one row per sample.
     fastp counts reads (R1+R2); the registry tracks PAIRS, so before/after
-    filtering counts are halved. Human contamination is mapped/total (a
-    fraction) turned into a percent. Missing values are left blank."""
+    filtering counts are halved. host_removed_read_pairs is already a pair count
+    (no halving). Human contamination is mapped/total (a fraction) turned into a
+    percent. Missing values are left blank."""
     import csv as _csv
 
     filt = filt_df.set_index("sample")
@@ -523,18 +543,23 @@ def save_qc_metrics_tsv(filt_df, read_quality_df, human_cont_df, outfile):
         except (TypeError, ValueError):
             return ""
 
-    samples = sorted(set(filt.index) | set(rq.index) | set(human.index))
+    samples = sorted(set(filt.index) | set(rq.index) | set(human.index)
+                     | set(nonhuman_pairs))
     with open(outfile, "w", newline="") as fh:
         w = _csv.writer(fh, delimiter="\t")
         w.writerow(["sample", "raw_read_pairs", "trimmed_read_pairs",
-                    "q30_pct", "human_pct"])
+                    "host_removed_read_pairs", "q30_pct", "human_pct"])
         for s in samples:
             raw = _pairs(filt.at[s, "before filtering"]) if s in filt.index else ""
             trimmed = _pairs(filt.at[s, "after filtering"]) if s in filt.index else ""
+            hostrm = nonhuman_pairs.get(s)
+            hostrm = "" if hostrm is None else hostrm
             q30 = _num(rq.at[s, "Q30 bp (%)"], 3) if s in rq.index else ""
             hum = _num(human.at[s, "Human"]) if s in human.index else ""
             hum = round(hum * 100, 4) if hum != "" else ""
-            w.writerow([s, raw, trimmed, q30, hum])
+            w.writerow([s, raw, trimmed, hostrm, q30, hum])
 
 
-save_qc_metrics_tsv(filtering_results_df, read_quality_df, human_cont_df, qc_metrics_tsv)
+nonhuman_pairs = get_nonhuman_pairs(nonhuman_files)
+save_qc_metrics_tsv(filtering_results_df, read_quality_df, human_cont_df,
+                    nonhuman_pairs, qc_metrics_tsv)

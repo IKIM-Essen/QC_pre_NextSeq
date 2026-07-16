@@ -7,6 +7,10 @@ rule qc_diversity_summary:
         stats=expand(
             "results/{{date}}/contamination/{sample}_stats.txt", sample=get_samples()
         ),
+        nonhuman=expand(
+            "results/{{date}}/contamination/{sample}_nonhuman_pairs.txt",
+            sample=get_samples(),
+        ),
         kaiju=expand(
             "results/{{date}}/report/kaiju/merged.kaiju_{level}.tsv",
             level=get_tax_levels(),
