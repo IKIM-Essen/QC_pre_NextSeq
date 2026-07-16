@@ -55,12 +55,17 @@ else:
                 level=get_tax_levels(),
             ),
             # preprocessed (trimmed [+ host-removed]) reads to hand back to the
-            # type pipelines; run_qc.sh deposits these into <type>/fastq/preprocessed/
-            expand(
-                "results/{date}/preprocessed/{sample}.{read}.fastq.gz",
-                date=DATE,
-                sample=get_samples(),
-                read=["1", "2"],
+            # type pipelines; run_qc.sh deposits these into <type>/fastq/preprocessed/.
+            # Skipped when emit-preprocessed is False (e.g. 16S: QC metrics only).
+            *(
+                expand(
+                    "results/{date}/preprocessed/{sample}.{read}.fastq.gz",
+                    date=DATE,
+                    sample=get_samples(),
+                    read=["1", "2"],
+                )
+                if emit_preprocessed()
+                else []
             ),
 
 

@@ -41,6 +41,32 @@ def get_trimmed_fastq(wildcards):
     return fastqs[0]
 
 
+def _cfg_bool(key, default):
+    """A config flag as a bool, tolerating a real YAML bool or a string
+    (snakemake --config passes strings)."""
+    val = config.get(key, default)
+    if isinstance(val, str):
+        return val.strip().lower() in ("true", "1", "yes", "on")
+    return bool(val)
+
+
+def emit_preprocessed():
+    """Whether to PRODUCE + deposit the preprocessed reads at all. run_qc.sh sets
+    it False for 16S (which keeps its own QIIME2 QC — primer trimming + DADA2 — so
+    fastp-trimmed reads aren't consumable there; only QC metrics are wanted) and
+    True for isolate/metagenome. Default True."""
+    return _cfg_bool("emit-preprocessed", True)
+
+
+def remove_human():
+    """Whether to REMOVE human reads from the deposited preprocessed reads (not
+    just MEASURE %human — that always happens). Type-dependent in practice:
+    run_qc.sh sets it True for isolate/metagenome and False for 16S (amplicon,
+    where host filtering isn't meaningful). Accepts a real YAML bool or a string
+    ('--config remove-human=False' passes a string), defaulting to True."""
+    return _cfg_bool("remove-human", True)
+
+
 def get_human_ref():
     if config["human-ref"]["use-local"]:
         local_ref = config["human-ref"]["local-path"]

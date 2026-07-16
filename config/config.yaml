@@ -28,6 +28,12 @@ sample-sheet:
 ## reads we persist. Toggle off if a sample type should keep its human reads.
 remove-human: True
 
+## Whether to PRODUCE + deposit the preprocessed reads at all. run_qc.sh sets this
+## per type: False for 16S (which keeps its own QIIME2 QC — primer trimming +
+## DADA2 — so fastp-trimmed reads aren't consumable there; only QC metrics are
+## wanted), True for isolate/metagenome. QC metrics are generated regardless.
+emit-preprocessed: True
+
 human-ref:
   use-local: True
   # path to a locally stored human reference genome

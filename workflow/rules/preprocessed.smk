@@ -21,7 +21,7 @@
 # =============================================================================
 
 
-if config.get("remove-human", True):
+if remove_human():
 
     rule preprocessed_reads:
         input:
