@@ -1,0 +1,26 @@
+# Lightweight container update: add ONLY the samtools env that the newer rules
+# (nonhuman_pairs, preprocessed_reads / host removal) need, on top of the existing
+# qc_container.sif — no full rebuild of all envs.
+#
+# The prefix hash below is snakemake's content hash for workflow/envs/samtools.yaml
+# (stable for local env files). Verify/refresh it with:
+#   snakemake --containerize --software-deployment-method conda | grep -A1 'envs/samtools.yaml'
+# It must match the "/conda-envs/<hash>" path in the runtime error.
+#
+# Build from the QC_pipeline repo ROOT (so the %files source resolves):
+#   apptainer build --fakeroot containerization/qc_container.NEW.sif \
+#       containerization/add_samtools_env.def
+# Then swap it in (keep a backup):
+#   mv containerization/qc_container.sif containerization/qc_container.sif.bak-$(date +%F)
+#   mv containerization/qc_container.NEW.sif containerization/qc_container.sif
+
+Bootstrap: localimage
+From: containerization/qc_container.sif
+
+%files
+    workflow/envs/samtools.yaml /conda-envs/a16a2b3e926d56870b7aca6ff2364298/environment.yaml
+
+%post
+    conda env create --prefix /conda-envs/a16a2b3e926d56870b7aca6ff2364298 \
+        --file /conda-envs/a16a2b3e926d56870b7aca6ff2364298/environment.yaml
+    conda clean --all -y
