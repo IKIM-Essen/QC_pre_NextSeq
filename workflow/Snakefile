@@ -45,9 +45,24 @@ else:
 
     rule all:
         input:
-            expand(
-                "results/{date}/report/{date}_report.zip",
-                date=DATE,
+            # Core aggregate outputs, requested EXPLICITLY. These used to be pulled
+            # in only indirectly, as inputs of the report.zip rule -- with the
+            # report now optional they must be named here, or turning it off would
+            # silently drop multiqc, the plots and (critically) qc_metrics.tsv,
+            # which is what feeds the registry.
+            expand("results/{date}/report/qc_metrics.tsv", date=DATE),
+            expand("results/{date}/report/filtering_summary/", date=DATE),
+            expand("results/{date}/report/qc/multiqc.html", date=DATE),
+            expand("results/{date}/report/plots/read_summary.html", date=DATE),
+            expand("results/{date}/report/plots/human_contamination.html", date=DATE),
+            # The bundled HTML report is optional (emit-report, default False):
+            # cosmetic, but the most failure-prone step (nested `snakemake
+            # --report` in the container) -- a failure there used to fail the
+            # whole run even though all the QC work had succeeded.
+            *(
+                expand("results/{date}/report/{date}_report.zip", date=DATE)
+                if emit_report()
+                else []
             ),
             expand(
                 "results/{date}/report/kaiju/merged.kaiju_{level}.tsv",

@@ -110,6 +110,18 @@ if not config["testing"]:
             "results/{date}/report/qc/multiqc.html",
             rules.qc_diversity_summary.output.read_summary_html,
             rules.qc_diversity_summary.output.human_cont_html,
+            # ORDERING dependency, not a content one: this rule shells out to a
+            # NESTED `snakemake --report`, which rebuilds the DAG over the same
+            # working dir. If any job is still running, that nested call aborts
+            # with IncompleteFilesException. preprocessed_reads is a parallel
+            # branch hanging off `rule all`, so without this the report could
+            # start while reads were still being written (seen 2026-07-21).
+            *(
+                expand("results/{{date}}/preprocessed/{sample}.{read}.fastq.gz",
+                       sample=get_samples(), read=["1", "2"])
+                if emit_preprocessed()
+                else []
+            ),
             # kaiju-based sections only exist meaningfully in diversity mode;
             # in QC mode create_plots writes placeholders to satisfy the DAG,
             # but we must NOT bundle them into the report (they were the "fake"

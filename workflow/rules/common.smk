@@ -58,6 +58,19 @@ def emit_preprocessed():
     return _cfg_bool("emit-preprocessed", True)
 
 
+def emit_report():
+    """Whether to build the bundled snakemake HTML report (report/<date>_report.zip).
+
+    Off by default: the report is purely cosmetic, but it is the most failure-prone
+    step in the workflow -- it shells out to a NESTED `snakemake --report` inside
+    the container, which has repeatedly failed (env leaking into the nested call;
+    IncompleteFilesException while a parallel branch was still running) and thereby
+    marked an otherwise complete QC run as FAILED. The per-sample and aggregate
+    outputs (qc_metrics.tsv, multiqc, plots, filtering_summary) are produced
+    regardless. Turn back on with `emit-report: True` (or QC_EMIT_REPORT=True)."""
+    return _cfg_bool("emit-report", False)
+
+
 def remove_human():
     """Whether to REMOVE human reads from the deposited preprocessed reads (not
     just MEASURE %human — that always happens). Type-dependent in practice:

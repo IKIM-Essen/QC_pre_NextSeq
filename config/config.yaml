@@ -34,6 +34,14 @@ remove-human: True
 ## wanted), True for isolate/metagenome. QC metrics are generated regardless.
 emit-preprocessed: True
 
+## Whether to build the bundled snakemake HTML report (report/<date>_report.zip).
+## Off by default: it is cosmetic, but it shells out to a NESTED `snakemake
+## --report` inside the container and is by far the most failure-prone step —
+## a failure there marked an otherwise fully successful QC run as FAILED
+## (2026-07-21). multiqc, the plots, filtering_summary and qc_metrics.tsv are
+## produced regardless. Set True (or QC_EMIT_REPORT=True) if you want the zip.
+emit-report: False
+
 human-ref:
   use-local: True
   # path to a locally stored human reference genome
